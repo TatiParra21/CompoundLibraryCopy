@@ -4,7 +4,7 @@ const sendPostRequest = async(body: Array<Record<string,string|number|boolean|st
      route:string
     ): Promise<void>=>{
         
-    const response = await fetch(`http://localhost:5000/api/${route}`,{
+    const response = await fetch(`https://compoundlibrarycopy.onrender.com/api/${route}`,{
         method:"POST",
         headers:{
             "Content-Type":"application/json"
@@ -19,7 +19,7 @@ const submitGetRequest=  async(closest_named_hex: string, route:string): Promise
         try{
             
            // console.log("closest", closest_named_hex)
-            const response = await fetch(`http://localhost:5000/api/${route}?closest=${encodeURIComponent(closest_named_hex)}`)
+            const response = await fetch(`https://compoundlibrarycopy.onrender.com/api/${route}?closest=${encodeURIComponent(closest_named_hex)}`)
            
             const data = await response.json()
            
