@@ -18,7 +18,7 @@ const sendPostRequest = async(body: Array<Record<string,string|number|boolean|st
 const submitGetRequest=  async(closest_named_hex: string, route:string): Promise<any>=>{
         try{
             
-           // console.log("closest", closest_named_hex)
+           console.log("closest", closest_named_hex)
             const response = await fetch(`https://compoundlibrarycopy.onrender.com/api/${route}?closest=${encodeURIComponent(closest_named_hex)}`)
            
             const data = await response.json()
