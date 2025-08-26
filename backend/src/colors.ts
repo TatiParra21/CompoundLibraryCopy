@@ -147,7 +147,7 @@ router.post('/:route', async(req: Request,res: Response):Promise<void>=>{
       res.status(200).json({ message: 'unique constraint is violation.Application is trying to insert a duplicate value into a column that has a unique constraint.', });
     }else{
       console.error("SOMETHING WORNG",err.code)
-      res.status(404).json({message:"UNKNOWN ERROR", err:err, route: route})
+      res.status(404).json({message:"UNKNOWN ERROR",request:req.body, err:err, route: route})
     } 
     
   }
