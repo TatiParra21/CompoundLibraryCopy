@@ -57,7 +57,7 @@ const makeValuesAndPlaceHolder =<T extends HexBodyType | ColorBodyType |ColorCon
 }
 router.post('/:route', async(req: Request,res: Response):Promise<void>=>{
   const {route, body} = req.params
-  
+  console.log(body, "THE BODy")
     try{
         let result
         if(route == "named_colors"){
