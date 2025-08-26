@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite",
     "dev:backend": "npx ts-node-dev --respawn --project tsconfig.backend.json backend/src/index.ts",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+      "build": "vite build",
+  "lint": "eslint .",
+  "preview": "vite preview"
   },
   "dependencies": {
     "chroma-js": "^3.1.2",
