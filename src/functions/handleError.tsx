@@ -7,7 +7,6 @@ export const handleError =(error:unknown,destination:string ):string=>{
         message = `Error in ${destination}: ${error}`
     } else {
         message = `${destination}: An unknown error occurred` 
-        
     }
     console.error(message);
     return message

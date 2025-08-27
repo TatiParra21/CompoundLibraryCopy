@@ -2,19 +2,14 @@ import type {  ComponentType } from "../components/types"
 import { ValComp } from "./ValComp"
 import { type HexSizeStoreType, hexSizeStore } from "../store/projectStore"
 export const ComponentBase =({ variant,colorName, mainStyle, className}: ComponentType)=>{
-  
    const {textType}:HexSizeStoreType = hexSizeStore(state=>state)
-  //const currentVariant :ColorSchemeVariantsType[] = schemes.variants
   const {aaatext,aatext,contrast_ratio} = variant
-    
     return(
          <div className="badge-div">
-            <h3>{colorName} </h3>
-            
+            <h3>{colorName} </h3>  
               <ValComp className={className} mainStyle={mainStyle} > 
                   {` ${variant?.hex ?? "white"}`}
                 </ValComp>
-             
             <div className="color-desc flex-colum">
                 {textType== "Normal" && <>
                   <p>{`Ratio: ${contrast_ratio ?? "no ratio yet"}`}</p>
@@ -29,6 +24,4 @@ export const ComponentBase =({ variant,colorName, mainStyle, className}: Compone
             </div>     
         </div>
     )
-  //console.log(contrast, foregroundHex, backgroundHex, aaText, aaaText)
- 
 }

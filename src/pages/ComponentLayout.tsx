@@ -10,12 +10,8 @@ type ComponentType = {
 export const ComponentLayout =({type}:ComponentType)=>{
     const {loading, allInfo, color,setDebouncedValue, debouncedValue,setColor}:ColorDataStoreType = colorDataStore(state=>state)
     const {currentPage, total}:PaginationStoreType = paginationStore(state=>state)
-   if(loading || !allInfo){
-      return   <div>{loading ? `...Loading ${type}s`:`No ${type}s Found` }</div>
-   }
+   if(loading || !allInfo)return <div>{loading ? `...Loading ${type}s`:`No ${type}s Found` }</div>
    const {mainColor:{name:mainName, hex:mainHex}, contrastColors}:ColorInfo = allInfo
-  
- 
    const contrastColorsOrdered = contrastColors.sort((a,b)=>Number(b.contrast_ratio)-Number(a.contrast_ratio))
    const allComponents = contrastColorsOrdered.map((schemecolor:ColorSchemeType)=>{
      const {name, hex} = schemecolor
@@ -26,7 +22,6 @@ export const ComponentLayout =({type}:ComponentType)=>{
             setDebouncedValue({...debouncedValue,count:debouncedValue.count + 50})
             setColor(color!) 
         }
-       
  return(
      <div className="result-sec flex-colum" >
         
@@ -34,11 +29,10 @@ export const ComponentLayout =({type}:ComponentType)=>{
                     <h3>ForeGround:</h3>
                     <p style={{color:mainHex}}>{`${color} ${mainName}`}</p>
             </div>
-          
                 <h2>{`Total Colors Found: ${total} `}</h2>
                 <button onClick={loadMore}>Load More?</button>
                   <PaginationComp />
-                <HexInfo>
+                    <HexInfo>
             <div className={`${type.toLowerCase()}s-sec`}>
                 {allComponents} 
             </div>

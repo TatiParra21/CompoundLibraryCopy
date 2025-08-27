@@ -1,11 +1,8 @@
 import type { JSX} from "react"
-import type { ColorPickerProps } from "./ColorPicker"
 import { type HexSizeStoreType, hexSizeStore } from "../store/projectStore"
-
-export const HexInfo =({children}:ColorPickerProps):JSX.Element=>{
+export const HexInfo =({children}:{children:React.ReactNode}):JSX.Element=>{
     const {textType, setTextType}: HexSizeStoreType = hexSizeStore(state=>state)
     const oppositeTextType = textType == "Normal" ? "Large" : "Normal"
-    
     return(
         <>
             <div className="foreground-sec">

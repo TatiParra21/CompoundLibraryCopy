@@ -1,18 +1,15 @@
 import { NavLink } from "react-router-dom"
 const Header: React.FC =()=>{
-
     type SelectedStyles ={
         color: string,
         fontWeight:"bold",
         textDecoration: "underline"
-
     }
     const defaultSelectedStyle: SelectedStyles = {
         color: "#161616",
         fontWeight: "bold",
         textDecoration: "underline",
 }
-
     const selectedStyle ={
         ...defaultSelectedStyle,
         color:"red"
@@ -28,9 +25,7 @@ const Header: React.FC =()=>{
                         <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="cards">Cards</NavLink>
                     </nav>
                 </div>
-
         </div>
     )
 }
-
 export default Header

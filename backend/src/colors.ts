@@ -1,7 +1,7 @@
 import express from "express"
 import { pool } from "./db"
 import type { Request,Response, Router } from "express"
-
+import { QueryResult } from "pg"
 const router: Router = express.Router()
 export type HexBodyType ={
   hex: string,
@@ -19,10 +19,13 @@ export type ColorContrastType={
   aatext:boolean, 
   aaatext:boolean
 }
-///tells router to handle posts requests in the route /colors
-function delay(ms: number) {
-            return new Promise((resolve) => {setTimeout(resolve, ms)});
+const errorResponses: Record<string, string>={
+'23505': 'Color already exists',
+'23503':'Color messes with table constraint',
+'23502': 'Not null violation',
 }
+
+///tells router to handle posts requests in the route /colors
 
 const makeValuesAndPlaceHolder =<T extends HexBodyType | ColorBodyType |ColorContrastType>(body:T[] )=>{
   const values: (string | number | boolean)[] = [];
@@ -56,102 +59,43 @@ const makeValuesAndPlaceHolder =<T extends HexBodyType | ColorBodyType |ColorCon
 
 }
 router.post('/:route', async(req: Request,res: Response):Promise<void>=>{
-  const {route, body} = req.params
-  console.log(body, "THE BODy")
+  const {route} = req.params
+  let result:QueryResult<any> |undefined
     try{
-        let result
-        if(route == "named_colors"){
-          const body = req.body as ColorBodyType[]
-         
-          if(!Array.isArray(body)|| body.length === 0){
-            res.status(400).json({ error: "Invalid array body", route: `${route}`});
+      const body = req.body as ColorBodyType | HexBodyType |ColorContrastType
+       if(!body ||!Array.isArray(body)|| body.length === 0){
+            res.status(400).json({ error: "Invalid array body or missing body", route: `${route}`});
           return;
-
-          }
-           const {values, placeholders} = makeValuesAndPlaceHolder(body)
-          if(!values || !placeholders){
-               res.status(400).json({error: "Missing color name or closest named hex", })
-          }else{
-           const query = 
-            `INSERT INTO named_colors (name, closest_named_hex) VALUES ${placeholders.join(", ")}  ON CONFLICT DO NOTHING RETURNING *;`
-            
-        const result = await pool.query(query,values)
-       if(result.rows.length == 0){res.status(200).json({message:"array is too short", found: true})}
-            else{
-                res.status(201).json(result.rows)
-              }
-          }
-        }else if(route =="hex_variants"){
-          const body = req.body as HexBodyType[]
-           if(!Array.isArray(body)|| body.length === 0){
-            res.status(400).json({ error: "Invalid array body", route: `${route}` });
-          return;
-
-          }
-           const {values, placeholders} = makeValuesAndPlaceHolder(body)
+          } 
+        const {values, placeholders} = makeValuesAndPlaceHolder(body)
           if(!values || !placeholders){
                res.status(400).json({error: "Missing color name or closest named hex", })
           }
-          
-          else{
-           const query = `INSERT INTO hex_variants(hex,closest_named_hex, clean_hex) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`
-            const result = await pool.query(query, values)
-           if(result.rows.length == 0){res.status(200).json({message:"array is too short", found: true})}
-           else{
-                res.status(201).json(result.rows)
-              }
-
-          }
-        }else if(route == "color_contrasts"){
-          const body = req.body as ColorContrastType[]
-           if(!Array.isArray(body)|| body.length === 0){
-            res.status(400).json({ error: "Invalid array body", route: `${route}` });
-          return;
-          }
-          if(!body){
-            res.status(400).json({error:"Missing body"})
-            throw new Error("error ocurred in body of color_contrasts") 
-          }
-           const {values, placeholders} = makeValuesAndPlaceHolder(body)
-          if(!values || !placeholders){
-               res.status(400).json({error: "Missing color name or closest named hex", })
-          }
-          else{
-          const  query =`INSERT INTO color_contrasts(hex1,hex2,contrast_ratio, aatext, aaatext) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`
-              const result = await pool.query(query,values)
-              if(result.rows.length == 0){res.status(200).json({message:"array is too short", found: true})}
-              else{
-                res.status(201).json(result.rows)
-
-              }
-            
-          }
-
+          const queryMap: Record<string,string> ={
+          "named_colors": `INSERT INTO named_colors (name, closest_named_hex) VALUES ${placeholders.join(", ")}  ON CONFLICT DO NOTHING RETURNING *;`,
+          "hex_variants": `INSERT INTO hex_variants(hex,closest_named_hex, clean_hex) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`,
+          "color_contrasts":`INSERT INTO color_contrasts(hex1,hex2,contrast_ratio, aatext, aaatext) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`
         }
-        
-
+        result = await pool.query(queryMap[route],values)
+      
+        if(!result){
+          res.status(400).json({error:"Unknown Route"})
+          return
+        }
+        if(result.rows.length == 0){res.status(200).json({message:"array is too short", found: true})}
+            else{ 
+              res.status(201).json(result.rows)
+              }
     }catch(err: any) {
-      if(route == "color_contrasts")console.log("found culprit")
-    if (err.code === '23505') {
-      // 23505 is PostgreSQL's "unique violation" error code
-     // console.error("this error happened?", route, err)
-     if(route == "color_contrasts")console.log("found culprit")
-       res.status(200).json({ message: 'Color already exists', found:true});
-       
-    }else if(err.code == '23503'){
-      res.status(200).json({ message: 'Color messes with table constraint',found:true });
-
-    }else if(err.code == '23502'){
-      res.status(200).json({ message: 'NOt null violation', });
-    }else if(err.code == '23505'){
-      res.status(200).json({ message: 'unique constraint is violation.Application is trying to insert a duplicate value into a column that has a unique constraint.', });
-    }else{
-      console.error("SOMETHING WORNG",err.code)
+      if(err.code && typeof err.code == "string"){
+        if (errorResponses[err.code]  ) {
+       res.status(200).json({ message: errorResponses[err.code] , found:true}); 
+        }
+      }
+      else{
       res.status(404).json({message:"UNKNOWN ERROR",request:req.body, err:err, route: route})
     } 
-    
   }
-  
 })
 const selectExplained = `SELECT 
   CASE 
@@ -181,55 +125,30 @@ JOIN named_colors nc
 WHERE cc.hex1 = $1 OR cc.hex2 = $1;
 `
 router.get("/:route",async(req: Request, res:Response): Promise<void>=>{
-  let isFetching
   const {route} = req.params
-  
   const {closest} =req.query
-  
   try{
-    if(route == "named_colors"){
-     // console.log(closest,route, "CLOSET?")
-     // console.log(req,"REQ")
-      isFetching = true
-     
-      //console.log(isFetching)
-     const result = await pool.query(`SELECT * FROM named_colors WHERE closest_named_hex = $1`,[closest])
-      if(result.rows.length === 0){
-       res.status(200).json({message:"NO colors with closest hex found", found:false})
-      }else if(result.rows.length >= 1)res.status(200).json({results:result.rows, message:"COLOR WAS FOUND",found:true})
-    }else if(route == "hex_variants"){
-      const result = await pool.query(`SELECT hv.hex,nc.closest_named_hex, nc.name, hv.clean_hex 
+    let result: QueryResult<any> |undefined
+    const queryMap: Record<string,string> ={
+      "named_colors": `SELECT * FROM named_colors WHERE closest_named_hex = $1`,
+      "hex_variants":`SELECT hv.hex,nc.closest_named_hex, nc.name, hv.clean_hex 
         FROM named_colors nc JOIN hex_variants hv 
-        ON nc.closest_named_hex = hv.closest_named_hex WHERE hv.hex = $1`,[closest])
-       // console.log(closest, "awwww")
-      if(result.rows.length == 0 ){ 
-        //console.log(closest, result.rows, "awwww")
-        res.status(200).json({message:"NO colors with hex found", found:false})
-      }else if(result.rows.length >= 1){
-         res.status(200).json({results:result.rows[0], message:"hex was found", found:true})
-      }
-  }else if(route == "color_contrasts"){
-   
-
-      const result = await pool.query(selectExplained,[closest])
-      if(result.rows.length == 0 ){ 
+        ON nc.closest_named_hex = hv.closest_named_hex WHERE hv.hex = $1`,
+        "color_contrasts":selectExplained
+    }
+      result = await pool.query(queryMap[route],[closest])
+      if(!result){
+          res.status(400).json({error:"Unknown Route"})
+          return
+        }
+        if(result.rows.length == 0 ){ 
         res.status(200).json({message:"NO colors with hex found", found:false})
       }else if(result.rows.length >= 1){
          res.status(200).json({results:result.rows, message:"hex was found", found:true})
       }
-     
-  }
-
   }catch(err:any){
-    console.log("what???")
-    console.error("something went wronff", err)
    res.status(500).json({error: "SOmething went wrong"})
-  }finally{
-    isFetching = false
-    //console.log("get request stopped")
-    
   }
-
 })
 
 export default router
