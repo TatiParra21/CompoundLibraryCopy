@@ -20,8 +20,8 @@ export const ValComp=({children, mainStyle, className}:ReactComponents)=>{
     }
     return(
     <>
-        <span onClick={onCopy}>Copy to Search</span>
-        <p  className={className} ref={refValue} style={{...mainStyle, cursor: "pointer", userSelect: "none" }}>
+        <span style={{cursor: "pointer", userSelect: "none" }} onClick={onCopy}>Copy to Search</span>
+        <p  className={className} ref={refValue} style={{...mainStyle, }}>
         {children}
         </p>
     </>
