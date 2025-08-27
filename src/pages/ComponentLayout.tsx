@@ -8,9 +8,10 @@ type ComponentType = {
     type:string
 }
 export const ComponentLayout =({type}:ComponentType)=>{
-    const {loading, allInfo, color,setDebouncedValue, debouncedValue,setColor}:ColorDataStoreType = colorDataStore(state=>state)
+    const {loading, allInfo, color,setDebouncedValue, debouncedValue,setColor, loadingProgress, setLoadingProgress}:ColorDataStoreType = colorDataStore(state=>state)
     const {currentPage, total}:PaginationStoreType = paginationStore(state=>state)
-   if(loading || !allInfo)return <div>{loading ? `...Loading ${type}s`:`No ${type}s Found` }</div>
+      
+   if(loading || !allInfo)return <div>{loading ? `...Loading ${type}s currently ${loadingProgress} out of 50`:`No ${type}s Found` }</div>
    const {mainColor:{name:mainName, hex:mainHex}, contrastColors}:ColorInfo = allInfo
    const contrastColorsOrdered = contrastColors.sort((a,b)=>Number(b.contrast_ratio)-Number(a.contrast_ratio))
    const allComponents = contrastColorsOrdered.map((schemecolor:ColorSchemeType)=>{

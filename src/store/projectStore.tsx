@@ -14,6 +14,8 @@ export type ColorDataStoreType ={
     setIsDisabled: (val:boolean)=>void,
     color:string | null
     setColor:(color:string)=>void
+    loadingProgress: string,
+    setLoadingProgress:(message:string)=>void
     loading: boolean
     setLoading: (value: boolean)=>void
     allInfo: ColorInfo |null
@@ -35,6 +37,8 @@ export const colorDataStore = create<ColorDataStoreType>((set)=>({
     setIsDisabled: (val:boolean)=> set({isDisabled:val}),
      color:"",
      setColor:(color:string)=>set({color}),
+     loadingProgress: "0",
+    setLoadingProgress:(message:string)=>set({loadingProgress:message}),
     loading: false,
     setLoading: (value:boolean)=>set({loading:value}),
     allInfo: null,

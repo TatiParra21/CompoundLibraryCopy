@@ -5,6 +5,7 @@ import type { ColorType, ColorInfo, ColorSchemeTypeArr,ColorSchemeType } from ".
 import { checkIfVariantInDB,checkIfContrastIn} from "./requestFunctions"
 import { getColorName } from "./fetchColorSchemes"
 import pLimit from 'p-limit';
+import { type ColorDataStoreType, colorDataStore } from "../store/projectStore"
 const limit = pLimit(20);
 const colorContrastCache : Map<ColorType, ColorSchemeType> = new Map<ColorType,ColorSchemeType>()
 const getOrAddColor =async(hexVal: string):Promise<ColorType>=>{
@@ -98,13 +99,14 @@ const getContrastingHexes =(baseColor:string, currentColor:string,count:number)=
         //check constrast filters out colors that have a ratio less then 3 with the basecolor
         return chromaFunc.filter(hex=>chroma.contrast(baseColor,hex) > 3)
 }
-export const generateContrastingColors =async(baseColor: string, count: number=5,dbArr:ColorSchemeTypeArr|'' =''): Promise<ColorSchemeTypeArr>=>{
-   // const contrastColor = whiteContrast > blackContrast ? "white" : "black"
+export const generateContrastingColors =async(baseColor: string, count: number=5,setLoadingProgress:(val:string)=>void,dbArr:ColorSchemeTypeArr|'' ='', ): Promise<ColorSchemeTypeArr>=>{
+
     const contrastColor = findContrastColors(baseColor, count)
     const bestColors:ColorSchemeTypeArr = []
     const allHexes = new Set<string>();
     const usedHexes = new Set<string>();
     const usedNamedHexes = new Set<string>();
+ 
     const manager :UsedAndNamedHexManagerType = addtoUsedAndNamedHexes(usedHexes,usedNamedHexes)
     if(dbArr && dbArr.length >0){
         dbArr.forEach(col=>{
@@ -134,41 +136,45 @@ export const generateContrastingColors =async(baseColor: string, count: number=5
             bestColors.push(...filteredColors)
         }else{ 
             empty++
-            console.log("current empty",empty)
+            //console.log("current empty",empty)
             if(empty >=maxEmpty)ranOut = true
         }
-       console.log("current length",bestColors.length)
+       //console.log("current length",bestColors.length)
+       setLoadingProgress(`${bestColors.length}`)
+
         attempts++
         turn++
     }
     }catch(err){
        throw err
+    }finally{
+          setLoadingProgress("0")
     }
     return bestColors.slice(0,count)
 }
-const getContrastsInDB =async(hex: string,count:number): Promise<ColorSchemeTypeArr>=>{
+const getContrastsInDB =async(hex: string,count:number, setLoadingProgress:(val:string)=>void): Promise<ColorSchemeTypeArr>=>{
     try{     
                 const storedContrasts= await checkIfContrastIn(hex)
-                     let contrasts = !storedContrasts.results ? await generateContrastingColors(hex,count) 
+                     let contrasts = !storedContrasts.results ? await generateContrastingColors(hex,count,setLoadingProgress) 
                     :storedContrasts.results.length >= count ? storedContrasts.results.slice(0,count)
                     :null
                    if(contrasts == null && storedContrasts.results.length >0){
                         console.log("aded up UPPPPPPP")
                         console.log(storedContrasts.results, "here")
                         const dbColors:ColorSchemeTypeArr = storedContrasts.results
-                        const newAdded:ColorSchemeTypeArr = await generateContrastingColors(hex,count - dbColors.length,dbColors)
+                        const newAdded:ColorSchemeTypeArr = await generateContrastingColors(hex,count - dbColors.length,setLoadingProgress,dbColors)
                         contrasts = [...dbColors,...newAdded]
                     }return contrasts
     }catch(err){
        throw err
     }       
 }
-const getColorInfo  =async(picked: string, count: number = 10 ) :Promise<ColorInfo>=> {
+const getColorInfo  =async(picked: string, count: number = 10, setLoadingProgress:(val:string)=>void ) :Promise<ColorInfo>=> {
                 try{
                     const findHex = await getOrAddColor(picked)
                      const mainColor: ColorType = findHex ? findHex: await getColorName(picked)
                        if(!mainColor) throw new Error("main color not found")  
-                    const contrastNames : ColorSchemeTypeArr = await getContrastsInDB(mainColor.hex,count) 
+                    const contrastNames : ColorSchemeTypeArr = await getContrastsInDB(mainColor.hex,count,setLoadingProgress) 
                     if (!contrastNames)throw new Error("Contrast colors not ffound")
                     return {mainColor,contrastColors: contrastNames} 
             }catch(err){

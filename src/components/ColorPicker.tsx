@@ -13,7 +13,7 @@ const saveAllData =async(bestColors: ColorSchemeTypeArr, baseColor: string)=>{
 }
 const ColorPicker =({children }:{children?:ReactNode})=>{
     const colorRef = useRef<string>("")
-    const {allInfo,loading,setAllInfo,color,setColor,isDisabled, setIsDisabled, debouncedValue, setDebouncedValue, setLoading,setErrorMessage}: ColorDataStoreType = colorDataStore(state=>state)
+    const {allInfo,loading,setAllInfo,color,setColor,isDisabled, setIsDisabled, debouncedValue, setDebouncedValue,setLoadingProgress, setLoading,setErrorMessage}: ColorDataStoreType = colorDataStore(state=>state)
    const {setCurrentPage, setTotal}: PaginationStoreType =paginationStore(state=>state)
     useEffect(()=>{
         if(!allInfo)return
@@ -27,7 +27,7 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
         setLoading(true)
         const fetchAll =async() =>{
             try{  
-             const colorInfo : ColorInfo = await getAllColorInfo(color, debouncedValue.count)  
+             const colorInfo : ColorInfo = await getAllColorInfo(color, debouncedValue.count,setLoadingProgress)  
              if(!colorInfo) throw new Error( "Color picker could not get colorInfo")
              setAllInfo(colorInfo)
             const totalPages = (Number((colorInfo.contrastColors.length/50).toFixed(0)))
