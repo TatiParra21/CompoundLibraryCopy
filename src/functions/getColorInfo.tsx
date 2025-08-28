@@ -5,7 +5,6 @@ import type { ColorType, ColorInfo, ColorSchemeTypeArr,ColorSchemeType } from ".
 import { checkIfVariantInDB,checkIfContrastIn} from "./requestFunctions"
 import { getColorName } from "./fetchColorSchemes"
 import pLimit from 'p-limit';
-import { type ColorDataStoreType, colorDataStore } from "../store/projectStore"
 const limit = pLimit(20);
 const colorContrastCache : Map<ColorType, ColorSchemeType> = new Map<ColorType,ColorSchemeType>()
 const getOrAddColor =async(hexVal: string):Promise<ColorType>=>{
