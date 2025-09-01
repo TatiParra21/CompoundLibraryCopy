@@ -8,20 +8,26 @@ import type{ DebouncedValues } from "../store/projectStore"
 import { colorDataStore, type ColorDataStoreType } from "../store/projectStore"
 import { paginationStore, type PaginationStoreType } from "../store/projectStore"
 const saveAllData =async(bestColors: ColorSchemeTypeArr, baseColor: string)=>{
-    await addHexVariantsArr(bestColors)
-    await addColorContrastsArr(baseColor,bestColors)
+    /*this function has 2 functions meant to update the database in supabase */
+    await addHexVariantsArr(bestColors) //saves hex variants to the hex_variants table in supabase
+    await addColorContrastsArr(baseColor,bestColors)/* 
+    this function saves all the resulting colors from the chosen main color. It saves the ratio, name etc so it doesn't have to 
+    us the API again. 
+    */
 }
 const ColorPicker =({children }:{children?:ReactNode})=>{
-    const colorRef = useRef<string>("")
+    const colorRef = useRef<string>("") //Reference to store latest color input, 
+    //this grabs states and actions from the global store using zustand
     const {allInfo,loading,setAllInfo,color,setColor,isDisabled, setIsDisabled, debouncedValue, setDebouncedValue,setLoadingProgress, setLoading,setErrorMessage}: ColorDataStoreType = colorDataStore(state=>state)
    const {setCurrentPage, setTotal}: PaginationStoreType =paginationStore(state=>state)
+   //Saves fetched colors to Supabase everytime allInfo updates
     useEffect(()=>{
         if(!allInfo)return
         const {contrastColors, mainColor} = allInfo
         saveAllData(contrastColors,mainColor.hex)
         setTotal(contrastColors.length)
      },[allInfo])
-
+     //fetches color from API or supabase whenever the selected color changes or the count changes.
     useEffect(()=>{
         if (!color)return
         setLoading(true)
@@ -39,7 +45,9 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
         } 
     };  fetchAll() 
     },[color,debouncedValue.count])
+    //Function that runs when user clicks on Search Constrasting Colors
     const choseFromColorInput =(input: keyof DebouncedValues)=>{  
+        //based on the color chosen on the input chosen by the user, the state of the color is set.
         const mainVal = debouncedValue[input]
         if(typeof mainVal == "string" ){
             if( input == "textInput"){
@@ -52,7 +60,8 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
             setColor(debouncedValue.textInput)
               setIsDisabled(true) 
         }     
-    }    
+    } 
+    /// A function meant to debounde the color input.   
     const debouncedValueFunction =(delay:number)=>{
         let timer:ReturnType<typeof setTimeout>
         return (e: React.ChangeEvent<HTMLInputElement>)=>{ 

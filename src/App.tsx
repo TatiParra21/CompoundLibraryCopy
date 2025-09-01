@@ -1,5 +1,5 @@
 
-import { Route, Routes, BrowserRouter  } from 'react-router-dom'
+import { Route, Routes, BrowserRouter,createBrowserRouter, RouterProvider  } from 'react-router-dom'
 import './App.css'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
@@ -8,26 +8,30 @@ import Badges from './pages/Badges'
 import Banners from './pages/Banners'
 import { SubLayout } from './components/SubLayout'
 
+const router = createBrowserRouter([
+  {path:"/",element:<Layout/>,
+  children:[
+    {index:true, element:<Dashboard/>},
+    {
+      element:<SubLayout/>,
+      children:[
+        {path:"badges",element:<Badges/>},
+        {path:"banners",element:<Banners/>},
+        {path:"cards",element:<Cards/>},
+      ]
+    
+    }
+  ]
+
+
+  }
+])
 function App() {
  
 
   return (
     <>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout/>}>
-            <Route index element={<Dashboard/>}/>
-            <Route element={<SubLayout/>}>
-              <Route path="badges" element={<Badges/>}/>
-              <Route path="banners" element={<Banners/>}/>
-              <Route path="cards" element={ <Cards/>}/>
-            </Route>
-          
-          
-          
-          </Route>
-        </Routes>
-      </BrowserRouter>
+<RouterProvider router={router}/>
       
     </>
   )
