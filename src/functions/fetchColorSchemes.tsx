@@ -28,7 +28,7 @@ export const createVariantsArray =(sameColor: Set<string>,hexValue: string, resp
 }
 export const getColorName =async(hexNum:string): Promise<ColorType>=>{
     try{
-      await delay(200)
+   
     const res = await fetch(`https://www.thecolorapi.com/id?hex=${hexNum.slice(1)}`)
         if(!res)throw new Error("response failed")
                     const data = await res.json()

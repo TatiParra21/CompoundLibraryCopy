@@ -32,13 +32,14 @@ export const checkIfInDB =async(closest_named_hex:string)=>{
   const answer =  await submitGetRequest(closest_named_hex, "named_colors")
   return answer
 }
-type checkIfVariantInDBResult ={
-    results?: ColorType
+export type checkIfVariantInDBResult ={
+    results?: ColorType[]
     message: string
     found: boolean
 }
 export const checkIfVariantInDB = async(hex: string):Promise<checkIfVariantInDBResult>=>{
     const answer = await submitGetRequest(hex, "hex_variants")
+    
     return answer
 }
 type FrontEndHexBodyType ={

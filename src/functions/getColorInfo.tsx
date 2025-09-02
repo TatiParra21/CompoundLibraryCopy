@@ -2,15 +2,16 @@
 import chroma from "chroma-js"
 import { getColorDataAPI } from "./fetchColorSchemes"
 import type { ColorType, ColorInfo, ColorSchemeTypeArr,ColorSchemeType } from "../components/types"
-import { checkIfVariantInDB,checkIfContrastIn} from "./requestFunctions"
+import { checkIfVariantInDB,checkIfContrastIn, type checkIfVariantInDBResult} from "./requestFunctions"
 import { getColorName } from "./fetchColorSchemes"
 import pLimit from 'p-limit';
 const limit = pLimit(20);
 const colorContrastCache : Map<ColorType, ColorSchemeType> = new Map<ColorType,ColorSchemeType>()
 const getOrAddColor =async(hexVal: string):Promise<ColorType>=>{
     try{  
-        const hexing = await checkIfVariantInDB(hexVal)
-        let test:ColorType = hexing.found && hexing.results ? destructureDBRes(hexing.results) : await getColorName(hexVal)
+        const hexing : checkIfVariantInDBResult= await checkIfVariantInDB(hexVal)
+        //console.log(hexing, "hexing res")
+        let test:ColorType = hexing.found && hexing?.results  ? hexing.results[0] : await getColorName(hexVal)
         //if it isn't not only do we get it from the api but we also add it to the database
             if(!test)throw new Error("test failed failed to get info from API")    
         return test
@@ -87,11 +88,8 @@ const findContrastColors =(base: string, count: number)=>{
    return Number(chroma.contrast(base, b))-Number(chroma.contrast(base, a))
  })
 }
-///function to destructure the obj containing color info
-const destructureDBRes=(hexResults: ColorType):ColorType=>{
-        const {hex,name,closest_named_hex, clean_hex} = hexResults
-        return {name, hex, clean_hex,closest_named_hex}
-}
+
+
 const getContrastingHexes =(baseColor:string, currentColor:string,count:number)=>{
      const chromaFunc = chroma.scale([baseColor,currentColor ]).colors(count)
         //gives us an array of random colors between the base color and the current contrast color
@@ -168,8 +166,9 @@ const getContrastsInDB =async(hex: string,count:number, setLoadingProgress:(val:
        throw err
     }       
 }
-const getColorInfo  =async(picked: string, count: number = 10, setLoadingProgress:(val:string)=>void ) :Promise<ColorInfo>=> {
+const getColorInfo  =async(pick: string, count: number = 10, setLoadingProgress:(val:string)=>void ) :Promise<ColorInfo>=> {
                 try{
+                    const picked = pick.toUpperCase()                 
                     const findHex = await getOrAddColor(picked)
                      const mainColor: ColorType = findHex ? findHex: await getColorName(picked)
                        if(!mainColor) throw new Error("main color not found")  

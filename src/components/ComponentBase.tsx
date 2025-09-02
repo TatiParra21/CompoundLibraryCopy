@@ -8,7 +8,7 @@ export const ComponentBase =({ variant,colorName, mainStyle, className}: Compone
          <div className="badge-div">
             <h3>{colorName} </h3>  
               <ValComp className={className} mainStyle={mainStyle} > 
-                  {` ${variant?.hex ?? "white"}`}
+                  {` ${variant?.hex}`}
                 </ValComp>
             <div className="color-desc flex-colum">
                 {textType== "Normal" && <>

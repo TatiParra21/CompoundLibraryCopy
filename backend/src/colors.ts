@@ -142,7 +142,7 @@ router.get("/:route",async(req: Request, res:Response): Promise<void>=>{
           return
         }
         if(result.rows.length == 0 ){ 
-        res.status(200).json({message:"NO colors with hex found", found:false})
+        res.status(200).json({message:"NO colors with hex found",hex: closest, found:false})
       }else if(result.rows.length >= 1){
          res.status(200).json({results:result.rows, message:"hex was found", found:true})
       }
