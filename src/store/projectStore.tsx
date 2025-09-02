@@ -70,3 +70,7 @@ export const paginationStore = create<PaginationStoreType>(set=>({
     setTotal:(num:number)=>set({total:num}),
     setCurrentPage:(page:number)=>set({currentPage:page})
 }))
+/*
+export type AuthStoreType ={
+    session: 
+} */

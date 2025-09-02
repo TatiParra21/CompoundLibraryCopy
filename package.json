@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "dev:backend": "npx ts-node-dev --respawn --project tsconfig.backend.json backend/src/index.ts",
-      "build": "vite build",
-  "lint": "eslint .",
-  "preview": "vite preview"
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
     "chroma-js": "^3.1.2",
     "dotenv": "^16.5.0",
     "rc-pagination": "^5.1.0",
