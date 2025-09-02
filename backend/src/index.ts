@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: "https://colorcchemescgenerator.netlify.app/badges",
+  origin: "*",
   methods: ["GET", "POST"],
   credentials: true
 }));
