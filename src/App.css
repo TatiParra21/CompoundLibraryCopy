@@ -137,7 +137,22 @@ flex: 1;
   margin:1em 0;
 }
 
-
+.auth-btns{
+  
+  align-self: flex-end;
+   gap:0.5rem;
+}
+.auth-btns button{
+  padding:0;
+  border:none;
+  background: none;
+  text-decoration: underline;
+ 
+}
+.auth-btns button:hover{
+ 
+ color:red;
+}
 
 
 /* Extra small devices (phones, less than 600px) */

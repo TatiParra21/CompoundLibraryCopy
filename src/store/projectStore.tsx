@@ -74,3 +74,22 @@ export const paginationStore = create<PaginationStoreType>(set=>({
 export type AuthStoreType ={
     session: 
 } */
+
+export type SupabaseInfoType ={
+    email:string,
+    setEmail:(val:string)=>void,
+    password:string,
+    setPassword:(val:string)=>void,
+    authError: string |null,
+    setAuthError:  (message:string|null)=>void
+    
+}
+
+export const supabaseInfoStore = create<SupabaseInfoType>((set)=>({
+     email:"",
+    setEmail:(val:string)=>set({email:val}),
+    password:"",
+    setPassword:(val:string)=>set({password:val}),
+    authError: null,
+    setAuthError:  (message:string|null)=>set({authError:message})
+}))

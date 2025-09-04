@@ -14,6 +14,10 @@ import { createContext, useContext } from "react"
     return(
         <>
             <main>
+                <div className="auth-btns flex-row">
+                    <button>Sign In</button>
+                    <button>Sign Up</button>
+                </div>
                 <ToggleContext.Provider value={[open,toggle]}>
                     <Header/>
                     <Outlet/>

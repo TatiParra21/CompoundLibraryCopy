@@ -7,7 +7,6 @@ type RatioType ={
     aaaText: boolean,
 }
 import type { ColorSchemeType, ColorType, SameColorNameType } from "../components/types"
-import { delay } from "./requestFunctions"
 declare let colorData: RatioType
 export const createVariantsArray =(sameColor: Set<string>,hexValue: string, responses :ColorSchemeType[]):SameColorNameType[]=>{
     const variantArr:SameColorNameType[] =[]
