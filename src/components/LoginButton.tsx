@@ -8,7 +8,7 @@ export const LoginButton =()=>{
         if(error){
             console.error("Google sign in error", error)
         }else{ 
-            console.log("redirecting t google login")
+            console.log("redirecting . google login")
             console.log(supabase.auth.getSession())
         }
         
