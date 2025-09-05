@@ -20,6 +20,7 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
     //this grabs states and actions from the global store using zustand
     const {allInfo,loading,setAllInfo,color,setColor,isDisabled, setIsDisabled, debouncedValue, setDebouncedValue,setLoadingProgress, setLoading,setErrorMessage}: ColorDataStoreType = colorDataStore(state=>state)
    const {setCurrentPage, setTotal}: PaginationStoreType =paginationStore(state=>state)
+   console.log("colorPivker")
    //Saves fetched colors to Supabase everytime allInfo updates
     useEffect(()=>{
         if(!allInfo)return

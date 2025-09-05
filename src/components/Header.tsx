@@ -14,6 +14,7 @@ const Header: React.FC =()=>{
         ...defaultSelectedStyle,
         color:"red"
     }
+   
     return(
         <div className="header">
             <h1>My Component Library</h1>

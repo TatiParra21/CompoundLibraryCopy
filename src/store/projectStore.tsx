@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { ColorInfo } from "../components/types";
-
+import { supabase } from "../supabaseClient";
+ console.log("chekc")
 export type HexSizeStoreType ={
     textType: "Normal" | "Large",
     setTextType: (value:"Normal" | "Large")=>void
@@ -93,3 +94,45 @@ export const supabaseInfoStore = create<SupabaseInfoType>((set)=>({
     authError: null,
     setAuthError:  (message:string|null)=>set({authError:message})
 }))
+
+export type AuthStateType = {
+  session: any | null;
+  setSession: (session: any | null) => void;
+  initAuth: () => void;
+}
+
+export const authStateStore = create<AuthStateType>((set)=>{
+    let sessionInProgress = false; 
+    
+    return{
+          session:  null,
+  setSession: (session: any | null) => set({session:session}),
+  initAuth: async() => {
+    try{
+        if(sessionInProgress)return
+        sessionInProgress = true
+        const {data, error} = await supabase.auth.getSession()
+        if(!data)throw new Error("error was here")
+            if(error)throw error
+        set({session:data.session})
+
+    }catch(err){
+        console.warn("Auth lock error ignored", err)
+        console.error("there was an error here")
+    }finally {
+    sessionInProgress = false;
+  }    
+    
+    // Listen to auth changes
+
+        supabase.auth.onAuthStateChange((_event, newSession) => {
+          set({ session: newSession });
+        });
+ 
+      
+  }
+        
+    }
+  
+})
+

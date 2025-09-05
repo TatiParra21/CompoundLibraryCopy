@@ -1,31 +1,43 @@
 import { Outlet } from "react-router-dom"
-import useToggle from "../hooks/useToggle"
-import { createContext, useContext } from "react"
+import {type JSX } from "react"
  import Header from "./Header"
- export type ToggleContextType =[boolean, ()=> void]
- const ToggleContext = createContext<ToggleContextType |null>(null)
- export const useToggleContext=()=>{
-    const context = useContext(ToggleContext)
-    if(!context)throw new Error("There was an error using toggle context")
-    return context
+import { NavLink } from "react-router-dom"
+import { authStateStore } from "../store/projectStore"
+import { UserMenu, } from "./UserMenu"
+import { supabaseInfoStore } from "../store/projectStore"
+const SignInUpComponents =():JSX.Element=>{
+    return(
+        <div className="auth-btns flex-row">
+                    <NavLink to="sign-in" >Sign In</NavLink>
+                    <NavLink  to="sign-up" >Sign Up</NavLink>
+         </div>
+    )
+}
+const UserIsSignedIn =({ email }: { email: string })=>{
+    return(
+        <div className="auth-btns flex-row">
+            <NavLink to="my-color-schemes" >My ColorSchemes</NavLink>
+          
+           <UserMenu email={email}/>
+         </div>
+        
+    )
 }
  const Layout =()=>{
-    const [open, toggle] = useToggle()
+    const session = authStateStore(state=>state.session)
+    const email = supabaseInfoStore(state=>state.email)
+  //  console.log("Layout", session.user)
     return(
         <>
             <main>
-                <div className="auth-btns flex-row">
-                    <button>Sign In</button>
-                    <button>Sign Up</button>
-                </div>
-                <ToggleContext.Provider value={[open,toggle]}>
+                {session ? <UserIsSignedIn email={email}/> : <SignInUpComponents/>}
                     <Header/>
                     <Outlet/>
-                </ToggleContext.Provider>
             </main>
             <footer>This is the Footer</footer>
         </>    
     )
  }
+
+ 
  export default Layout
- export{ToggleContext}
