@@ -8,11 +8,13 @@ import {
   Stack,
   Text,useAvatar, Button
 } from "@chakra-ui/react"
+import { supabase } from "../supabaseClient"
+import { supabaseInfoStore } from "../store/projectStore"
+export const Logout =({handleLogout}:{handleLogout:  () => Promise<void>}) =>{
 
-export function Logout({ email }: { email: string }) {
   return (
     <HStack>
-      <Button>CLiCK</Button>
+      <Button onClick={handleLogout} >Logout</Button>
 
     </HStack>
   )
@@ -25,9 +27,7 @@ export const Dem = () => {
   const avatar = useAvatar()
   return (
     <Stack align="flex-start">
-      <Avatar.RootProvider value={avatar}>
-       
-        
+      <Avatar.RootProvider value={avatar}> 
       </Avatar.RootProvider>
       
     </Stack>
@@ -44,6 +44,24 @@ const AvatarComponent =()=>{
 import { LuChartLine } from "react-icons/lu"
 
 export const UserMenu = ({ email }: { email: string }) => {
+    const setEmail = supabaseInfoStore(state => state.setEmail)
+         const setPassword = supabaseInfoStore(state => state.setPassword)
+         const resetInfo=()=>{
+            setEmail("")
+              setPassword("")  
+
+         }
+  const handleLogout=async()=>{
+      
+    try{
+      const {error} = await supabase.auth.signOut()
+      if(error)throw new Error(error.message)
+        resetInfo()
+    }catch(err){
+      console.error(err)
+    }
+  }
+       
   return (
     <HoverCard.Root size="sm">
       <HoverCard.Trigger asChild>
@@ -64,10 +82,7 @@ export const UserMenu = ({ email }: { email: string }) => {
                   <Text textStyle="sm" fontWeight="semibold">
                     {email}
                   </Text>
-                  <Text textStyle="sm" color="fg.muted">
-                    The most powerful toolkit for building modern web
-                    applications.
-                  </Text>
+                  <Logout handleLogout={handleLogout} />
                 </Stack>
                 <HStack color="fg.subtle">
                   <Icon size="sm">

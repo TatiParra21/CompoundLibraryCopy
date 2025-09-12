@@ -1,10 +1,10 @@
 import { supabase } from "../supabaseClient"
 
 export const LoginButton =()=>{
-console.log("login button")
+
     const signInWithGoogle =async()=>{
         try{
-             const {data, error} = await supabase.auth.signInWithOAuth({
+             const {error} = await supabase.auth.signInWithOAuth({
             provider:"google"
         })
         if(error){
@@ -21,7 +21,7 @@ console.log("login button")
     }
     return(
         <>
-        <button onClick={(e)=>{ e.preventDefault(); signInWithGoogle; }}>Sign in With Google</button>
+        <button onClick={(e)=>{ e.preventDefault(); signInWithGoogle(); }}>Sign in With Google</button>
         
         </>
     )
