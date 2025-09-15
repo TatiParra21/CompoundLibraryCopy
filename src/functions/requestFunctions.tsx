@@ -1,5 +1,5 @@
 import type { ColorSchemeTypeArr, ColorType } from "../components/types"
-
+import { getColorName } from "./fetchColorSchemes"
 const sendPostRequest = async(body: Array<Record<string,string|number|boolean|string[]>>, //this states the body should be an object, where every key, and every val is a string
      route:string
     ): Promise<void>=>{     
@@ -11,6 +11,7 @@ const sendPostRequest = async(body: Array<Record<string,string|number|boolean|st
         body: JSON.stringify(body) //stringifies the info for the backend
     })
     const data = await response.json()
+    console.log(data, "seeing", body.length)
     if(!data.found)console.log(`added to ${route} color: `, data)        
 }
 const submitGetRequest=  async(closest_named_hex: string, route:string): Promise<any>=>{
@@ -47,6 +48,29 @@ type FrontEndHexBodyType ={
 }
 export function delay(ms: number) {
             return new Promise((resolve) => {setTimeout(resolve, ms)});
+}
+export const handleSingleColor =async(hexVal:string):Promise<ColorType>=>{
+      const hexing : checkIfVariantInDBResult= await checkIfVariantInDB(hexVal)
+       const hexVariantArr:FrontEndHexBodyType[] = []
+        const colorNameArr: FrontEndColorType[] =[]
+        //console.log(hexing, "hexing res")
+        if(!hexing.results) {
+            console.log("connfusioon")
+                let test:ColorType =  await getColorName(hexVal)
+                const {hex, closest_named_hex, clean_hex, name} = test
+                 hexVariantArr.push({hex,closest_named_hex, clean_hex})
+                  colorNameArr.push({name, closest_named_hex})
+                     await sendPostRequest(colorNameArr, "named_colors")
+                  await sendPostRequest(hexVariantArr,"hex_variants")
+                  return test
+
+
+
+        }else{
+            return hexing.results[0] 
+        }
+    
+        //if it isn't not only do we get it from the api but we also add it to the database
 }
 
 export const checkIfContrastIn =async(mainHex:string)=>{

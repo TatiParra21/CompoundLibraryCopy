@@ -82,7 +82,7 @@ router.post('/:route', async(req: Request,res: Response):Promise<void>=>{
           res.status(400).json({error:"Unknown Route"})
           return
         }
-        if(result.rows.length == 0){res.status(200).json({message:"array is too short", found: true})}
+        if(result.rows.length == 0){res.status(200).json({message:"array is short", found: true, res: result.rows})}
             else{ 
               res.status(201).json(result.rows)
               }

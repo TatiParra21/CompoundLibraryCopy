@@ -1,7 +1,8 @@
 import type {  ComponentType } from "../components/types"
 import { useRef } from "react"
 import { type HexSizeStoreType, hexSizeStore, type ColorDataStoreType, colorDataStore } from "../store/projectStore"
-
+import { supabase } from "../supabaseClient"
+import { useNavigate } from "react-router-dom"
 const ColorDataInfoComp =({contrast_ratio, aatext, aaatext}:{contrast_ratio:string|number, aatext:boolean, aaatext:boolean})=>{
   return(
     <>
@@ -11,8 +12,10 @@ const ColorDataInfoComp =({contrast_ratio, aatext, aaatext}:{contrast_ratio:stri
     </>
   )
 }
+
 export const ComponentBase =({ variant,colorName, mainStyle, className}: ComponentType)=>{
     const { copyHex, setIsDisabled} : ColorDataStoreType= colorDataStore(state=>state)
+    const navigate = useNavigate()
     const refValue = useRef<HTMLInputElement>(null)
     const onCopy =()=>{
         const hexValue = refValue.current?.innerText
@@ -22,6 +25,21 @@ export const ComponentBase =({ variant,colorName, mainStyle, className}: Compone
             setIsDisabled(false)
         }
     }
+    const redirectToSignIn =async()=>{
+      try{
+         const {data, error} = await supabase.auth.getSession()
+          if(error)throw new Error(error.message)
+            //console.log(data.session)
+          if(!data.session) navigate("/sign-in",{state:{fromFeature:"save"}})
+
+      }catch(err){
+        console.error(err)
+
+      }
+     
+    
+
+}
    const {textType}:HexSizeStoreType = hexSizeStore(state=>state)
   const {aaatext,aatext,contrast_ratio} = variant
     return(
@@ -38,7 +56,7 @@ export const ComponentBase =({ variant,colorName, mainStyle, className}: Compone
                {textType == "Large" && <>
                 <ColorDataInfoComp contrast_ratio={contrast_ratio}  aatext={Number(contrast_ratio) > 3} aaatext={Number(contrast_ratio) > 4.5}/>
                </>}
-               <button>Save Color</button>
+               <button onClick={redirectToSignIn}>Save ColorScheme</button>
             </div>     
         </div>
     )

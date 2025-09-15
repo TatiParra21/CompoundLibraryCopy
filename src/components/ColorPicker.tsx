@@ -20,7 +20,6 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
     //this grabs states and actions from the global store using zustand
     const {allInfo,loading,setAllInfo,color,setColor,isDisabled, setIsDisabled, debouncedValue, setDebouncedValue,setLoadingProgress, setLoading,setErrorMessage}: ColorDataStoreType = colorDataStore(state=>state)
    const {setCurrentPage, setTotal}: PaginationStoreType =paginationStore(state=>state)
-   console.log("colorPivker")
    //Saves fetched colors to Supabase everytime allInfo updates
     useEffect(()=>{
         if(!allInfo)return
@@ -84,7 +83,7 @@ const updateDebouncedValue = debouncedValueFunction(300)
                         <input type="text" id="write" value={debouncedValue.textInput ?? ""} onChange={(e)=>updateDebouncedValue(e)}/>
                     </div>        
             </div> 
-             <button className="search-btn" disabled={loading ? true :isDisabled} onClick={()=>choseFromColorInput("textInput")}>Search contrasting colors</button> 
+             <button className="search-btn" disabled={loading ? true :isDisabled} onClick={()=>choseFromColorInput("textInput")}>{loading ? "...loading" : "Search contrasting colors"}</button> 
         </div>
             <>
                 {children}

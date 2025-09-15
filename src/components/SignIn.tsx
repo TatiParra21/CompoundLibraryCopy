@@ -1,7 +1,9 @@
 import { LoginButton } from "./LoginButton"
 import { supabase } from "../supabaseClient"
 import { supabaseInfoStore} from "../store/projectStore"
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+
  const capitalizeFirstLetter =(value: string):string=>{
     return value.charAt(0).toUpperCase() + value.slice(1)
   }
@@ -25,6 +27,8 @@ export const FormComponent = ({type}:{type:string})=>{
     const setAuthError = supabaseInfoStore(state => state.setAuthError)
     const setEmail = supabaseInfoStore(state => state.setEmail)
     const setPassword = supabaseInfoStore(state => state.setPassword)
+    const location = useLocation()
+    const fromFeature = location.state?.fromFeature ? location.state.fromFeature : ""
     const handleSubmit=async(e: React.FormEvent<HTMLFormElement>)=>{
         const form = e.currentTarget;
         const formData = new FormData(form);
@@ -47,14 +51,27 @@ export const FormComponent = ({type}:{type:string})=>{
         <div  className="sign-form-container flex colum">
             <form onSubmit={handleSubmit}
             aria-label="Sign in form"
-          aria-describedby="form-description"
-          className="flex colum">
-           <InputComponent category="email" type={type}/>
-           <InputComponent category="password" type={type}/>
+            aria-describedby="form-description"
+            className="flex colum">
+                {fromFeature && fromFeature =="save" && <p>You must be logged in to save</p> }
+                <InputComponent category="email" type={type}/>
+                <InputComponent category="password" type={type}/>
               {authError && <p>{authError}</p>}
-        <button type="submit">{type == "sign-in" ? "Sign In": "Sign Up"}</button>
+                <button type="submit">{type == "sign-in" ? "Sign In": "Sign Up"}</button>
+   
+       
             </form>
             <LoginButton/>
+                 {
+            type =="sign-in" ? <div>
+                 <p>Don't have an account? </p>
+                 <NavLink to="/sign-up">Create one</NavLink>
+            </div> :
+            <div>
+                 <p>Already have an account? </p>
+                 <NavLink to="/sign-in">Sign in</NavLink>
+            </div>
+        }
         </div>
     )
 }

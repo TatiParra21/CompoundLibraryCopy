@@ -2,7 +2,7 @@
 import chroma from "chroma-js"
 import { getColorDataAPI } from "./fetchColorSchemes"
 import type { ColorType, ColorInfo, ColorSchemeTypeArr,ColorSchemeType } from "../components/types"
-import { checkIfVariantInDB,checkIfContrastIn, type checkIfVariantInDBResult} from "./requestFunctions"
+import { checkIfVariantInDB,checkIfContrastIn, type checkIfVariantInDBResult, handleSingleColor} from "./requestFunctions"
 import { getColorName } from "./fetchColorSchemes"
 import pLimit from 'p-limit';
 const limit = pLimit(20);
@@ -13,6 +13,7 @@ const getOrAddColor =async(hexVal: string):Promise<ColorType>=>{
         //console.log(hexing, "hexing res")
         let test:ColorType = hexing.found && hexing?.results  ? hexing.results[0] : await getColorName(hexVal)
         //if it isn't not only do we get it from the api but we also add it to the database
+     
             if(!test)throw new Error("test failed failed to get info from API")    
         return test
     }catch(err){
@@ -169,8 +170,9 @@ const getContrastsInDB =async(hex: string,count:number, setLoadingProgress:(val:
 const getColorInfo  =async(pick: string, count: number = 10, setLoadingProgress:(val:string)=>void ) :Promise<ColorInfo>=> {
                 try{
                     const picked = pick.toUpperCase()                 
-                    const findHex = await getOrAddColor(picked)
-                     const mainColor: ColorType = findHex ? findHex: await getColorName(picked)
+                
+               
+                     const mainColor: ColorType = await handleSingleColor(picked)
                        if(!mainColor) throw new Error("main color not found")  
                     const contrastNames : ColorSchemeTypeArr = await getContrastsInDB(mainColor.hex,count,setLoadingProgress) 
                     if (!contrastNames)throw new Error("Contrast colors not ffound")
