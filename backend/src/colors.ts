@@ -76,14 +76,16 @@ router.post('/:route', async(req: Request,res: Response):Promise<void>=>{
           "hex_variants": `INSERT INTO hex_variants(hex,closest_named_hex, clean_hex) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`,
           "color_contrasts":`INSERT INTO color_contrasts(hex1,hex2,contrast_ratio, aatext, aaatext) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`
         }
-        console.log(queryMap,  values, "I  DO NNOT UNDERSYAND")
+       
         result = await pool.query(queryMap[route],values)
       
         if(!result){
           res.status(400).json({error:"Unknown Route"})
           return
         }
-        if(result.rows.length == 0){res.status(200).json({message:"array is short", found: true, res: result.rows})}
+        if(result.rows.length == 0){
+           console.log(queryMap, body, values, "I  DO NNOT UNDERSYAND")
+          res.status(200).json({message:"array is short", found: true, res: result.rows})}
             else{ 
               res.status(201).json(result.rows)
               }
