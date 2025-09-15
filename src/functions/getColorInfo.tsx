@@ -3,9 +3,18 @@ import chroma from "chroma-js"
 import { getColorDataAPI } from "./fetchColorSchemes"
 import type { ColorType, ColorInfo, ColorSchemeTypeArr,ColorSchemeType } from "../components/types"
 import { checkIfVariantInDB,checkIfContrastIn, type checkIfVariantInDBResult, handleSingleColor} from "./requestFunctions"
+import { addHexVariantsArr, addColorContrastsArr } from "../functions/requestFunctions"
 import { getColorName } from "./fetchColorSchemes"
 import pLimit from 'p-limit';
 const limit = pLimit(20);
+const saveAllData =async(bestColors: ColorSchemeTypeArr, baseColor: string)=>{
+    /*this function has 2 functions meant to update the database in supabase */
+    await addHexVariantsArr(bestColors) //saves hex variants to the hex_variants table in supabase
+    await addColorContrastsArr(baseColor,bestColors)/* 
+    this function saves all the resulting colors from the chosen main color. It saves the ratio, name etc so it doesn't have to 
+    us the API again. 
+    */
+}
 const colorContrastCache : Map<ColorType, ColorSchemeType> = new Map<ColorType,ColorSchemeType>()
 const getOrAddColor =async(hexVal: string):Promise<ColorType>=>{
     try{  
@@ -147,6 +156,7 @@ export const generateContrastingColors =async(baseColor: string, count: number=5
        throw err
     }finally{
           setLoadingProgress("0")
+          saveAllData(bestColors, baseColor)
     }
     return bestColors.slice(0,count)
 }

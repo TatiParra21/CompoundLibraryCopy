@@ -2,19 +2,12 @@ import { useEffect, useRef } from "react"
 import type {ReactNode} from "react"
 import getAllColorInfo from "../functions/getAllColorInfo"
 import type { ColorInfo, ColorSchemeTypeArr} from "./types"
-import { addHexVariantsArr, addColorContrastsArr } from "../functions/requestFunctions"
+
 import { handleError } from "../functions/handleError"
 import type{ DebouncedValues } from "../store/projectStore"
 import { colorDataStore, type ColorDataStoreType } from "../store/projectStore"
 import { paginationStore, type PaginationStoreType } from "../store/projectStore"
-const saveAllData =async(bestColors: ColorSchemeTypeArr, baseColor: string)=>{
-    /*this function has 2 functions meant to update the database in supabase */
-    await addHexVariantsArr(bestColors) //saves hex variants to the hex_variants table in supabase
-    await addColorContrastsArr(baseColor,bestColors)/* 
-    this function saves all the resulting colors from the chosen main color. It saves the ratio, name etc so it doesn't have to 
-    us the API again. 
-    */
-}
+
 const ColorPicker =({children }:{children?:ReactNode})=>{
     const colorRef = useRef<string>("") //Reference to store latest color input, 
     //this grabs states and actions from the global store using zustand
@@ -24,7 +17,7 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
     useEffect(()=>{
         if(!allInfo)return
         const {contrastColors, mainColor} = allInfo
-        saveAllData(contrastColors,mainColor.hex)
+       
         setTotal(contrastColors.length)
      },[allInfo])
      //fetches color from API or supabase whenever the selected color changes or the count changes.
