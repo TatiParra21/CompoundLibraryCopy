@@ -84,7 +84,8 @@ router.post('/:route', async(req: Request,res: Response):Promise<void>=>{
           return
         }
         if(result.rows.length == 0){
-           console.log(queryMap, body, values, "I  DO NNOT UNDERSYAND")
+          console.log(result.rows.length,  "THE LENGTH")
+           console.log(queryMap, body,"BODYY", values, "I  DO NNOT UNDERSYAND")
           res.status(200).json({message:"array is short", found: true, res: result.rows})}
             else{ 
               res.status(201).json(result.rows)
