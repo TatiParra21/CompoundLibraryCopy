@@ -76,6 +76,7 @@ router.post('/:route', async(req: Request,res: Response):Promise<void>=>{
           "hex_variants": `INSERT INTO hex_variants(hex,closest_named_hex, clean_hex) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`,
           "color_contrasts":`INSERT INTO color_contrasts(hex1,hex2,contrast_ratio, aatext, aaatext) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`
         }
+        console.log(queryMap,  values, "I  DO NNOT UNDERSYAND")
         result = await pool.query(queryMap[route],values)
       
         if(!result){
