@@ -29,26 +29,6 @@ name:string, closest_named_hex: string
 export const addColorInfoToDB =async(arr: FrontEndColorType[])=>{
    await sendPostRequest(arr, "named_colors")
 }
-export const checkIfInDB =async(closest_named_hex:string)=>{
-  const answer =  await submitGetRequest(closest_named_hex, "named_colors")
-  return answer
-}
-export type checkIfVariantInDBResult ={
-    results?: ColorType[]
-    message: string
-    found: boolean
-}
-export const checkIfVariantInDB = async(hex: string):Promise<checkIfVariantInDBResult>=>{
-    const answer = await submitGetRequest(hex, "hex_variants")
-    
-    return answer
-}
-type FrontEndHexBodyType ={
-    hex:string, closest_named_hex:string, clean_hex: string
-}
-export function delay(ms: number) {
-            return new Promise((resolve) => {setTimeout(resolve, ms)});
-}
 export const handleSingleColor =async(hexVal:string):Promise<ColorType>=>{
       const hexing : checkIfVariantInDBResult= await checkIfVariantInDB(hexVal)
        const hexVariantArr:FrontEndHexBodyType[] = []
@@ -72,6 +52,35 @@ export const handleSingleColor =async(hexVal:string):Promise<ColorType>=>{
     
         //if it isn't not only do we get it from the api but we also add it to the database
 }
+export const checkIfNamedColorsInDB =async(arr: FrontEndColorType[])=>{
+    const results = await Promise.allSettled( arr.map(col=>checkIfInDB(col.closest_named_hex)))
+   
+    const resultsFullfilled = results.filter(res=> res.status == "fulfilled")
+    const missingColors = resultsFullfilled.filter(res=> !res.value?.found)
+    //console.log(missingColors, "missing")
+
+}
+export const checkIfInDB =async(closest_named_hex:string)=>{
+  const answer =  await submitGetRequest(closest_named_hex, "named_colors")
+  return answer
+}
+export type checkIfVariantInDBResult ={
+    results?: ColorType[]
+    message: string
+    found: boolean
+}
+export const checkIfVariantInDB = async(hex: string):Promise<checkIfVariantInDBResult>=>{
+    const answer = await submitGetRequest(hex, "hex_variants")
+    
+    return answer
+}
+type FrontEndHexBodyType ={
+    hex:string, closest_named_hex:string, clean_hex: string
+}
+export function delay(ms: number) {
+            return new Promise((resolve) => {setTimeout(resolve, ms)});
+}
+
 
 export const checkIfContrastIn =async(mainHex:string)=>{
  const res = await submitGetRequest(mainHex, "color_contrasts")
