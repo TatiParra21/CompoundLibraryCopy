@@ -5,6 +5,7 @@ import { NavLink } from "react-router-dom"
 import { authStateStore } from "../store/projectStore"
 import { UserMenu, } from "./UserMenu"
 import { supabaseInfoStore } from "../store/projectStore"
+import { getUserSavedSchemesRequest } from "../functions/requestFunctions"
 const SignInUpComponents =():JSX.Element=>{
     return(
         <div className="auth-btns flex-row">
@@ -13,11 +14,26 @@ const SignInUpComponents =():JSX.Element=>{
          </div>
     )
 }
-const UserIsSignedIn =({ email }: { email: string })=>{
+//  <NavLink to="my-color-schemes" >My ColorSchemes</NavLink> 
+const UserIsSignedIn =({ email, userId }: { email: string, userId:string |null})=>{
+    const getUserSchemes = async()=>{
+        try{
+            if(!userId)return
+             const schemes =  await getUserSavedSchemesRequest(userId,"saved_user_color_schemes")
+            console.log(schemes)
+
+
+        }catch(err){
+            throw err
+
+        }
+      
+
+    }
     return(
         <div className="auth-btns flex-row">
-            <NavLink to="my-color-schemes" >My ColorSchemes</NavLink>
-          
+       
+          <button onClick={getUserSchemes}>My colorSchemes</button>
            <UserMenu email={email}/>
          </div>
         
@@ -25,12 +41,14 @@ const UserIsSignedIn =({ email }: { email: string })=>{
 }
  const Layout =()=>{
     const session = authStateStore(state=>state.session)
+  const userId = authStateStore(state=>state.userId)
     const email = supabaseInfoStore(state=>state.email)
-  //  console.log("Layout", session.user)
+  
+   
     return(
         <>
             <main>
-                {session ? <UserIsSignedIn email={email}/> : <SignInUpComponents/>}
+                {session ? <UserIsSignedIn email={email} userId={userId}/> : <SignInUpComponents/>}
                     <Header/>
                     <Outlet/>
             </main>

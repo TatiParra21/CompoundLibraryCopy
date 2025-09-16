@@ -73,7 +73,11 @@ const updateDebouncedValue = debouncedValueFunction(300)
                     <div className="flex-colum test-class" >
                         <input type="color" id="picker" value={debouncedValue.textInput ?? "#000000"} onChange={(e)=>updateDebouncedValue(e)}/>
                         <input type="text" id="write" value={debouncedValue.textInput ?? ""} onChange={(e)=>updateDebouncedValue(e)}/>
-                        <button 
+                       
+                    </div>        
+            </div> 
+             <button className="search-btn" disabled={loading ? true :isDisabled} onClick={()=>choseFromColorInput("textInput")}>{loading ? "...loading" : "Search contrasting colors"}</button> 
+                <button 
                                 onClick={async () => {
                                   try {
                                     const text = await navigator.clipboard.readText(); // get clipboard text
@@ -91,9 +95,7 @@ const updateDebouncedValue = debouncedValueFunction(300)
                                 >
                                     Paste from clipboard
                             </button>
-                    </div>        
-            </div> 
-             <button className="search-btn" disabled={loading ? true :isDisabled} onClick={()=>choseFromColorInput("textInput")}>{loading ? "...loading" : "Search contrasting colors"}</button> 
+        
         </div>
             <>
                 {children}

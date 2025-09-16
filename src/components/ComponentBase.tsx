@@ -20,7 +20,7 @@ export const ComponentBase =({ variant,colorName, mainStyle, className}: Compone
     const setIsDisabled = colorDataStore(state=>state.setIsDisabled)
     const baseColor = colorDataStore(state=>state.allInfo?.mainColor)
     if(!baseColor)throw new Error("Basecolornot in")
-    console.log(baseColor,  "base")
+   
     const navigate = useNavigate()
     const refValue = useRef<HTMLInputElement>(null)
     const onCopy =()=>{
@@ -35,7 +35,6 @@ export const ComponentBase =({ variant,colorName, mainStyle, className}: Compone
       try{
          const {data, error} = await supabase.auth.getSession()
           if(error)throw new Error(error.message)
-            console.log(data.session)
           if(!data.session) navigate("/sign-in",{state:{fromFeature:"save"}})
             else if(data.session.user.id){
           const hexPairs: [string, string][] = [

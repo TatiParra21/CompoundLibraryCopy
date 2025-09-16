@@ -33,6 +33,15 @@ const submitGetRequest=  async(closest_named_hex: string, route:string): Promise
             throw new Error(`in SubmitRequest in requestFunctions ${err}`)
         }
 }
+export const getUserSavedSchemesRequest=  async(user_id: string, route:string): Promise<any>=>{
+        try{
+            const response = await fetch(`https://compoundlibrarycopy.onrender.com/api/${route}?closest=${encodeURIComponent(user_id)}`)
+            const data = await response.json()    
+            return data
+        }catch(err){
+            throw new Error(`in SubmitRequest in requestFunctions ${err}`)
+        }
+}
 type FrontEndColorType ={
 name:string, closest_named_hex: string
 }

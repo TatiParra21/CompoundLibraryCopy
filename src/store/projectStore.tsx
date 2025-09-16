@@ -97,6 +97,7 @@ export const supabaseInfoStore = create<SupabaseInfoType>((set)=>({
 
 export type AuthStateType = {
   session: any | null;
+  userId:string |null,
   setSession: (session: any | null) => void;
   initAuth: () => void;
 }
@@ -107,6 +108,7 @@ export const authStateStore = create<AuthStateType>((set)=>{
     return{
           session:  null,
   setSession: (session: any | null) => set({session:session}),
+  userId: null,
   initAuth: async() => {
     try{
         if(sessionInProgress)return
@@ -128,7 +130,10 @@ export const authStateStore = create<AuthStateType>((set)=>{
         supabase.auth.onAuthStateChange((_event, newSession) => {
     
        console.log(newSession, "session")
-          set({ session: newSession });
+          set({ session: newSession,
+                userId:newSession?.user?.id 
+
+          });
         });
  
       
