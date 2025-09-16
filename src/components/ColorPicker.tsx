@@ -1,16 +1,12 @@
 import { useEffect, useRef } from "react"
 import type {ReactNode} from "react"
 import getAllColorInfo from "../functions/getAllColorInfo"
-import type { ColorSchemeType, ColorInfo, ColorSchemeTypeArr} from "./types"
-import { checkIfNamedColorsInDB } from "../functions/requestFunctions"
+import type {ColorInfo} from "./types"
 import { handleError } from "../functions/handleError"
 import type{ DebouncedValues } from "../store/projectStore"
 import { colorDataStore, type ColorDataStoreType } from "../store/projectStore"
 import { paginationStore, type PaginationStoreType } from "../store/projectStore"
-const saveClosestHexNames =(arr: ColorSchemeTypeArr)=>{
-const closestWithName = arr.map((col: ColorSchemeType) => ({name: col.name, closest_named_hex: col.closest_named_hex}));
-checkIfNamedColorsInDB(closestWithName)
-}
+
 const ColorPicker =({children }:{children?:ReactNode})=>{
     const colorRef = useRef<string>("") //Reference to store latest color input, 
     //this grabs states and actions from the global store using zustand
@@ -20,8 +16,7 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
     useEffect(()=>{
         if(!allInfo)return
         const {contrastColors, mainColor} = allInfo
-        saveClosestHexNames(contrastColors)
-       
+        
         setTotal(contrastColors.length)
      },[allInfo])
      //fetches color from API or supabase whenever the selected color changes or the count changes.

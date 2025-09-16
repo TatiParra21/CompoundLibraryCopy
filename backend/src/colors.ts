@@ -19,6 +19,17 @@ export type ColorContrastType={
   aatext:boolean, 
   aaatext:boolean
 }
+export type SavedUserColorSchemeType={
+  user_id:string,
+  scheme_name:string,
+  hex1:string,
+  hex1name:string,
+  hex2:string,
+  hex2name:string,
+  contrast_ratio: number, 
+  aatext:boolean, 
+  aaatext:boolean
+}
 const errorResponses: Record<string, string>={
 '23505': 'Color already exists',
 '23503':'Color messes with table constraint',
@@ -46,6 +57,14 @@ const makeValuesAndPlaceHolder =<T extends HexBodyType | ColorBodyType |ColorCon
       placeholders.push(`($${i + 1}, $${i + 2}, $${i + 3})`);
       values.push(color.hex, color.closest_named_hex, color.clean_hex);
     });
+  }else if("user_id" in body[0]){
+     body.forEach((entry, index) => {
+      const i = index * 9;
+      const color = entry as SavedUserColorSchemeType
+      placeholders.push(`($${i + 1}, $${i + 2}, $${i + 3}, $${i + 4}, $${i + 5}, $${i + 6}, $${i + 7}, $${i + 8},$${i + 9})`);
+      values.push(color.user_id, color.scheme_name,color.hex1, color.hex1name, color.hex2,color.hex2name, color.contrast_ratio, color.aatext, color.aaatext );
+    });
+
   }else if("hex1"in body[0] && "hex2" in body[0]){
      body.forEach((entry, index) => {
       const i = index * 5;
@@ -74,7 +93,8 @@ router.post('/:route', async(req: Request,res: Response):Promise<void>=>{
           const queryMap: Record<string,string> ={
           "named_colors": `INSERT INTO named_colors (name, closest_named_hex) VALUES ${placeholders.join(", ")}  ON CONFLICT DO NOTHING RETURNING *;`,
           "hex_variants": `INSERT INTO hex_variants(hex,closest_named_hex, clean_hex) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`,
-          "color_contrasts":`INSERT INTO color_contrasts(hex1,hex2,contrast_ratio, aatext, aaatext) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`
+          "color_contrasts":`INSERT INTO color_contrasts(hex1,hex2,contrast_ratio, aatext, aaatext) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`,
+          "saved_user_color_schemes":`INSERT INTO saved_user_color_schemes(user_id,scheme_name, hex1,hex1name, hex2,hex2name,contrast_ratio, aatext, aaatext) VALUES ${placeholders.join(", ")} ON CONFLICT DO NOTHING RETURNING *;`
         }
        
         result = await pool.query(queryMap[route],values)

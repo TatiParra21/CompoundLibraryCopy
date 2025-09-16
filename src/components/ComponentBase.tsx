@@ -1,6 +1,7 @@
-import type {  ComponentType } from "../components/types"
+import type {  ComponentType, ColorSchemeType } from "../components/types"
 import { useRef } from "react"
 import { type HexSizeStoreType, hexSizeStore, type ColorDataStoreType, colorDataStore } from "../store/projectStore"
+import { saveColorSchemeForUser, type SavedUserColorSchemeType } from "../functions/requestFunctions"
 import { supabase } from "../supabaseClient"
 import { useNavigate } from "react-router-dom"
 const ColorDataInfoComp =({contrast_ratio, aatext, aaatext}:{contrast_ratio:string|number, aatext:boolean, aaatext:boolean})=>{
@@ -14,7 +15,12 @@ const ColorDataInfoComp =({contrast_ratio, aatext, aaatext}:{contrast_ratio:stri
 }
 
 export const ComponentBase =({ variant,colorName, mainStyle, className}: ComponentType)=>{
-    const { copyHex, setIsDisabled} : ColorDataStoreType= colorDataStore(state=>state)
+   
+    const copyHex = colorDataStore(state=>state.copyHex)
+    const setIsDisabled = colorDataStore(state=>state.setIsDisabled)
+    const baseColor = colorDataStore(state=>state.allInfo?.mainColor)
+    if(!baseColor)throw new Error("Basecolornot in")
+    console.log(baseColor,  "base")
     const navigate = useNavigate()
     const refValue = useRef<HTMLInputElement>(null)
     const onCopy =()=>{
@@ -25,12 +31,33 @@ export const ComponentBase =({ variant,colorName, mainStyle, className}: Compone
             setIsDisabled(false)
         }
     }
-    const redirectToSignIn =async()=>{
+    const redirectOrSave=async()=>{
       try{
          const {data, error} = await supabase.auth.getSession()
           if(error)throw new Error(error.message)
-            //console.log(data.session)
+            console.log(data.session)
           if(!data.session) navigate("/sign-in",{state:{fromFeature:"save"}})
+            else if(data.session.user.id){
+          const hexPairs: [string, string][] = [
+              [baseColor.hex, baseColor.name],
+              [variant.hex, variant.name]
+              ];
+              hexPairs.sort((a,b)=>a[0].localeCompare(b[0]))
+            const [[hex1,hex1name],[hex2,hex2name]] = hexPairs
+          const savedSchemeInfo : SavedUserColorSchemeType ={
+            user_id: data.session.user.id,
+            scheme_name:"",
+            hex1:hex1,
+            hex1name:hex1name,
+            hex2:hex2,
+            hex2name:hex2name,
+            contrast_ratio: Number(variant.contrast_ratio), 
+            aatext:variant.aatext, 
+            aaatext:variant.aaatext
+
+          }
+          await saveColorSchemeForUser(savedSchemeInfo)
+          }
 
       }catch(err){
         console.error(err)
@@ -56,7 +83,7 @@ export const ComponentBase =({ variant,colorName, mainStyle, className}: Compone
                {textType == "Large" && <>
                 <ColorDataInfoComp contrast_ratio={contrast_ratio}  aatext={Number(contrast_ratio) > 3} aaatext={Number(contrast_ratio) > 4.5}/>
                </>}
-               <button onClick={redirectToSignIn}>Save ColorScheme</button>
+               <button onClick={redirectOrSave}>Save ColorScheme</button>
             </div>     
         </div>
     )

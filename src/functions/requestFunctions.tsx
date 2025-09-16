@@ -1,5 +1,16 @@
 import type { ColorSchemeTypeArr, ColorType } from "../components/types"
 import { getColorName } from "./fetchColorSchemes"
+export type SavedUserColorSchemeType={
+  user_id:string,
+  scheme_name:string,
+  hex1:string,
+  hex1name:string,
+  hex2:string,
+  hex2name:string,
+  contrast_ratio: number, 
+  aatext:boolean, 
+  aaatext:boolean
+}
 const sendPostRequest = async(body: Array<Record<string,string|number|boolean|string[]>>, //this states the body should be an object, where every key, and every val is a string
      route:string
     ): Promise<void>=>{     
@@ -11,7 +22,6 @@ const sendPostRequest = async(body: Array<Record<string,string|number|boolean|st
         body: JSON.stringify(body) //stringifies the info for the backend
     })
     const data = await response.json()
-    console.log(data, "seeing", body.length)
     if(!data.found)console.log(`added to ${route} color: `, data)        
 }
 const submitGetRequest=  async(closest_named_hex: string, route:string): Promise<any>=>{
@@ -33,7 +43,6 @@ export const handleSingleColor =async(hexVal:string):Promise<ColorType>=>{
       const hexing : checkIfVariantInDBResult= await checkIfVariantInDB(hexVal)
        const hexVariantArr:FrontEndHexBodyType[] = []
         const colorNameArr: FrontEndColorType[] =[]
-        //console.log(hexing, "hexing res")
         if(!hexing.results) {
             console.log("connfusioon")
                 let test:ColorType =  await getColorName(hexVal)
@@ -43,23 +52,13 @@ export const handleSingleColor =async(hexVal:string):Promise<ColorType>=>{
                      await sendPostRequest(colorNameArr, "named_colors")
                   await sendPostRequest(hexVariantArr,"hex_variants")
                   return test
-
-
-
         }else{
             return hexing.results[0] 
         }
-    
         //if it isn't not only do we get it from the api but we also add it to the database
 }
-export const checkIfNamedColorsInDB =async(arr: FrontEndColorType[])=>{
-    const results = await Promise.allSettled( arr.map(col=>checkIfInDB(col.closest_named_hex)))
-   
-    const resultsFullfilled = results.filter(res=> res.status == "fulfilled")
-    const missingColors = resultsFullfilled.filter(res=> !res.value?.found)
-    //console.log(missingColors, "missing")
 
-}
+
 export const checkIfInDB =async(closest_named_hex:string)=>{
   const answer =  await submitGetRequest(closest_named_hex, "named_colors")
   return answer
@@ -112,4 +111,9 @@ export const addHexVariantsArr = async(otherColors: ColorSchemeTypeArr)=>{
     }
     await sendPostRequest(colorNameArr, "named_colors")
     await sendPostRequest(hexVariantArr,"hex_variants")
+}
+
+export const saveColorSchemeForUser =async(pickedScheme: SavedUserColorSchemeType)=>{
+     await sendPostRequest([pickedScheme], "saved_user_color_schemes")
+
 }

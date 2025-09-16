@@ -2,7 +2,6 @@ import { create } from "zustand";
 import type { ColorInfo } from "../components/types";
 import { supabase } from "../supabaseClient";
 
- console.log("chekc")
 export type HexSizeStoreType ={
     textType: "Normal" | "Large",
     setTextType: (value:"Normal" | "Large")=>void
@@ -128,7 +127,7 @@ export const authStateStore = create<AuthStateType>((set)=>{
 
         supabase.auth.onAuthStateChange((_event, newSession) => {
     
-       
+       console.log(newSession, "session")
           set({ session: newSession });
         });
  

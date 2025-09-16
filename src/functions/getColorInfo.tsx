@@ -19,10 +19,7 @@ const colorContrastCache : Map<ColorType, ColorSchemeType> = new Map<ColorType,C
 const getOrAddColor =async(hexVal: string):Promise<ColorType>=>{
     try{  
         const hexing : checkIfVariantInDBResult= await checkIfVariantInDB(hexVal)
-        //console.log(hexing, "hexing res")
         let test:ColorType = hexing.found && hexing?.results  ? hexing.results[0] : await getColorName(hexVal)
-        //if it isn't not only do we get it from the api but we also add it to the database
-     
             if(!test)throw new Error("test failed failed to get info from API")    
         return test
     }catch(err){
@@ -143,10 +140,8 @@ export const generateContrastingColors =async(baseColor: string, count: number=5
             bestColors.push(...filteredColors)
         }else{ 
             empty++
-            //console.log("current empty",empty)
             if(empty >=maxEmpty)ranOut = true
         }
-       //console.log("current length",bestColors.length)
        setLoadingProgress(`${bestColors.length}`)
 
         attempts++
@@ -167,8 +162,6 @@ const getContrastsInDB =async(hex: string,count:number, setLoadingProgress:(val:
                     :storedContrasts.results.length >= count ? storedContrasts.results.slice(0,count)
                     :null
                    if(contrasts == null && storedContrasts.results.length >0){
-                        console.log("aded up UPPPPPPP")
-                        console.log(storedContrasts.results, "here")
                         const dbColors:ColorSchemeTypeArr = storedContrasts.results
                         const newAdded:ColorSchemeTypeArr = await generateContrastingColors(hex,count - dbColors.length,setLoadingProgress,dbColors)
                         contrasts = [...dbColors,...newAdded]
