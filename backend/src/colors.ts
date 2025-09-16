@@ -159,7 +159,10 @@ router.get("/:route",async(req: Request, res:Response): Promise<void>=>{
         FROM named_colors nc JOIN hex_variants hv 
         ON nc.closest_named_hex = hv.closest_named_hex WHERE hv.hex = $1`,
         "color_contrasts":selectExplained,
-        "saved_user_color_schemes": `SELECT ss.scheme_name, ss.hex1, ss.hex1name, ss.hex2, ss.hex2name, ss.contrast_ratio, ss.aatext, ss.aaatext FROM saved_user_color_schemes ss where ss.id = $1`
+       "saved_user_color_schemes": `
+        SELECT scheme_name, hex1, hex1name, hex2, hex2name, contrast_ratio, aatext, aaatext
+          FROM saved_user_color_schemes
+                        WHERE user_id = $1`
 
     }
       result = await pool.query(queryMap[route],[closest])
@@ -167,6 +170,7 @@ router.get("/:route",async(req: Request, res:Response): Promise<void>=>{
           res.status(400).json({error:"Unknown Route"})
           return
         }
+        
         if(result.rows.length == 0 ){ 
         res.status(200).json({message:"NO colors with hex found",hex: closest, found:false})
       }else if(result.rows.length >= 1){
