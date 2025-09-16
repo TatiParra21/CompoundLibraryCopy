@@ -158,7 +158,9 @@ router.get("/:route",async(req: Request, res:Response): Promise<void>=>{
       "hex_variants":`SELECT hv.hex,nc.closest_named_hex, nc.name, hv.clean_hex 
         FROM named_colors nc JOIN hex_variants hv 
         ON nc.closest_named_hex = hv.closest_named_hex WHERE hv.hex = $1`,
-        "color_contrasts":selectExplained
+        "color_contrasts":selectExplained,
+        "saved_user_color_schemes": `SELECT ss.scheme_name, ss.hex1, ss.hex1name, ss.hex2, ss.hex2name, ss.contrast_ratio, ss.aatext, ss.aaatext FROM saved_user_color_schemes ss where ss.id = $1`
+
     }
       result = await pool.query(queryMap[route],[closest])
       if(!result){
