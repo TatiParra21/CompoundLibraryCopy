@@ -124,5 +124,6 @@ export const addHexVariantsArr = async(otherColors: ColorSchemeTypeArr)=>{
 
 export const saveColorSchemeForUser =async(pickedScheme: SavedUserColorSchemeType)=>{
      await sendPostRequest([pickedScheme], "saved_user_color_schemes")
+     
 
 }

@@ -1,14 +1,21 @@
 import type { ColorInfo, ColorSchemeType } from "../components/types"
 import { HexInfo } from "../components/HexInfo"
 import DynamicComponent from "../components/DynamicComponent"
-import { colorDataStore, type ColorDataStoreType } from "../store/projectStore"
+import { colorDataStore, selectDebouncedValue, selectLoadingProgress, selectSetColor, selectSetDebouncedValue, 
+    type PaginationStoreType, paginationStore, selectLoading, selectAllInfo, selectColor, } from "../store/projectStore"
 import { PaginationComp } from "../components/PaginationComp"
-import { type PaginationStoreType, paginationStore } from "../store/projectStore"
-type ComponentType = {
-    type:string
-}
-export const ComponentLayout =({type}:ComponentType)=>{
-    const {loading, allInfo, color,setDebouncedValue, debouncedValue,setColor, loadingProgress, setLoadingProgress}:ColorDataStoreType = colorDataStore(state=>state)
+
+export const ComponentLayout =({type}:{type:string})=>{
+   
+    const loading = colorDataStore(selectLoading)
+    const allInfo = colorDataStore(selectAllInfo)
+    const color = colorDataStore(selectColor)
+    const debouncedValue= colorDataStore(selectDebouncedValue)
+    const loadingProgress = colorDataStore(selectLoadingProgress)
+
+    const setDebouncedValue = colorDataStore(selectSetDebouncedValue)
+    const setColor = colorDataStore(selectSetColor)
+
     const {currentPage, total}:PaginationStoreType = paginationStore(state=>state)
       
    if(loading || !allInfo)return <div>{loading ? `...Loading ${type}s currently ${loadingProgress} out of 50`:`No ${type}s Found` }</div>

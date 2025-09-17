@@ -12,6 +12,7 @@ import { FormComponent} from './components/SignIn'
 import { Provider } from './components/ui/provider'
 import {  authStateStore } from './store/projectStore'
 import { supabaseInfoStore } from './store/projectStore'
+import { UserColorSchemesComp } from './components/UserColorSchemesComp'
 
 const router = createBrowserRouter([
   {path:"/",element:<Layout/>,
@@ -23,14 +24,16 @@ const router = createBrowserRouter([
         {path:"sign-up",element:<FormComponent type="sign-up"/>,
            errorElement: <h2>Oops! Page not found or crashed.</h2>
         },
+        {path:"my-color-schemes",element:<UserColorSchemesComp/>,
+           errorElement: <h2>Oops! Page not found or crashed.</h2>
+        },
     {
       element:<SubLayout/>,
       children:[
         {path:"badges",element:<Badges/>},
         {path:"banners",element:<Banners/>},
         {path:"cards",element:<Cards/>},
-      ]
-    
+      ] 
     }
   ]
   }
@@ -42,13 +45,37 @@ const initAuth = authStateStore(state=>state.initAuth)
 const session = authStateStore(state=>state.session)
 const setEmail = supabaseInfoStore(state=>state.setEmail)
 const email = supabaseInfoStore(state=>state.email)
+const fetchUserSchemes = authStateStore(state=>state.fetchUserSchemes)
+const setUserSchemes = authStateStore(state=>state.setUserSchemes)
+  const userId = authStateStore(state=>state.userId)
+
+ 
+
   useEffect(()=>{
    initAuth()
+   
   },[])
   useEffect(()=>{
     if(email)return
     if(session)
    setEmail(session.user.email)
+   
+  },[session])
+
+  useEffect(()=>{
+    const getUserSchemes = async()=>{
+          try{
+          
+              if(!userId)return
+              const schemes = await fetchUserSchemes(userId)
+             setUserSchemes((schemes))
+          }catch(err){
+              throw err
+          }
+      }
+      getUserSchemes()
+  
+   
   },[session])
   return (
     <>

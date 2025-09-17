@@ -45,11 +45,8 @@ import { LuChartLine } from "react-icons/lu"
 
 export const UserMenu = ({ email }: { email: string }) => {
     const setEmail = supabaseInfoStore(state => state.setEmail)
-         const setPassword = supabaseInfoStore(state => state.setPassword)
          const resetInfo=()=>{
             setEmail("")
-              setPassword("")  
-
          }
   const handleLogout=async()=>{
       

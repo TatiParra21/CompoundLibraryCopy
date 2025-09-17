@@ -4,8 +4,8 @@ import {type JSX } from "react"
 import { NavLink } from "react-router-dom"
 import { authStateStore } from "../store/projectStore"
 import { UserMenu, } from "./UserMenu"
-import { supabaseInfoStore } from "../store/projectStore"
-import { getUserSavedSchemesRequest } from "../functions/requestFunctions"
+import { supabaseInfoStore, } from "../store/projectStore"
+
 const SignInUpComponents =():JSX.Element=>{
     return(
         <div className="auth-btns flex-row">
@@ -14,26 +14,14 @@ const SignInUpComponents =():JSX.Element=>{
          </div>
     )
 }
-//  <NavLink to="my-color-schemes" >My ColorSchemes</NavLink> 
+//  
 const UserIsSignedIn =({ email, userId }: { email: string, userId:string |null})=>{
-    const getUserSchemes = async()=>{
-        try{
-            if(!userId)return
-             const schemes =  await getUserSavedSchemesRequest(userId,"saved_user_color_schemes")
-            console.log(schemes)
-
-
-        }catch(err){
-            throw err
-
-        }
-      
-
-    }
+    const userSchemes = authStateStore(state=>state.fetchUserSchemes)
+   
     return(
         <div className="auth-btns flex-row">
        
-          <button onClick={getUserSchemes}>My colorSchemes</button>
+          <NavLink to="my-color-schemes" >My ColorSchemes</NavLink> 
            <UserMenu email={email}/>
          </div>
         

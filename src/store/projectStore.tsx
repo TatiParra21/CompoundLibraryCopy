@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { ColorInfo } from "../components/types";
 import { supabase } from "../supabaseClient";
-
+import { getUserSavedSchemesRequest } from "../functions/requestFunctions";
 export type HexSizeStoreType ={
     textType: "Normal" | "Large",
     setTextType: (value:"Normal" | "Large")=>void
@@ -54,6 +54,15 @@ export const colorDataStore = create<ColorDataStoreType>((set)=>({
     }))
 
 }))
+export const selectLoading = (state: ColorDataStoreType) => state.loading;
+export const selectAllInfo = (state: ColorDataStoreType) => state.allInfo;
+export const selectColor = (state: ColorDataStoreType) => state.color;
+export const selectDebouncedValue = (state: ColorDataStoreType) => state.debouncedValue;
+export const selectLoadingProgress = (state: ColorDataStoreType) => state.loadingProgress;
+
+export const selectSetColor = (state: ColorDataStoreType) => state.setColor;
+export const selectSetDebouncedValue = (state: ColorDataStoreType) => state.setDebouncedValue;
+export const selectSetLoadingProgress = (state: ColorDataStoreType) => state.setLoadingProgress;
 
 export type PaginationStoreType ={
     currentPage: number,
@@ -71,33 +80,36 @@ export const paginationStore = create<PaginationStoreType>(set=>({
     setTotal:(num:number)=>set({total:num}),
     setCurrentPage:(page:number)=>set({currentPage:page})
 }))
-/*
-export type AuthStoreType ={
-    session: 
-} */
 
 export type SupabaseInfoType ={
     email:string,
     setEmail:(val:string)=>void,
-    password:string,
-    setPassword:(val:string)=>void,
     authError: string |null,
-    setAuthError:  (message:string|null)=>void
-    
+    setAuthError:  (message:string|null)=>void 
 }
 
 export const supabaseInfoStore = create<SupabaseInfoType>((set)=>({
      email:"",
     setEmail:(val:string)=>set({email:val}),
-    password:"",
-    setPassword:(val:string)=>set({password:val}),
     authError: null,
     setAuthError:  (message:string|null)=>set({authError:message})
 }))
-
+export type UserSchemesData={
+  scheme_name:string,
+  hex1:string,
+  hex1name:string,
+  hex2:string,
+  hex2name:string,
+  contrast_ratio: number, 
+  aatext:boolean, 
+  aaatext:boolean
+}
 export type AuthStateType = {
-  session: any | null;
+  session: any | null,
   userId:string |null,
+  userSchemes: UserSchemesData[] |null,
+  setUserSchemes: (schemes:UserSchemesData[]) =>void,
+  fetchUserSchemes: (userId:string)=>Promise<UserSchemesData[]>
   setSession: (session: any | null) => void;
   initAuth: () => void;
 }
@@ -109,6 +121,14 @@ export const authStateStore = create<AuthStateType>((set)=>{
           session:  null,
   setSession: (session: any | null) => set({session:session}),
   userId: null,
+  userSchemes:null, 
+  setUserSchemes: (schemes:UserSchemesData[])=>set({userSchemes: schemes}),
+ fetchUserSchemes: async(userId:string):Promise<UserSchemesData[]>=>{
+   
+    const userData = await getUserSavedSchemesRequest(userId,"saved_user_color_schemes")
+    return userData.results
+
+ },
   initAuth: async() => {
     try{
         if(sessionInProgress)return
@@ -116,30 +136,25 @@ export const authStateStore = create<AuthStateType>((set)=>{
         const {data, error} = await supabase.auth.getSession()
         if(!data)throw new Error("error was here")
             if(error)throw error
-        set({session:data.session})
+        set({session:data.session,
 
+        })
     }catch(err){
         console.warn("Auth lock error ignored", err)
         console.error("there was an error here")
     }finally {
     sessionInProgress = false;
   }    
-    
-    // Listen to auth changes
-
         supabase.auth.onAuthStateChange((_event, newSession) => {
-    
        console.log(newSession, "session")
+       
           set({ session: newSession,
-                userId:newSession?.user?.id 
+                userId:newSession?.user?.id,
+                
 
           });
         });
- 
-      
-  }
-        
+    }      
     }
-  
 })
 

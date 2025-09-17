@@ -162,6 +162,12 @@ border:solid black 2px;
  
  color:red;
 }
+.color-div:hover{
+ border: solid 2px red;
+}
+button:disabled{
+  color:gray;
+}
 input:-webkit-autofill {
   animation-name: autofill;
   animation-duration: 0.01s;

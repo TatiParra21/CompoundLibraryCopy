@@ -26,7 +26,7 @@ export const FormComponent = ({type}:{type:string})=>{
     const authError = supabaseInfoStore(state => state.authError)
     const setAuthError = supabaseInfoStore(state => state.setAuthError)
     const setEmail = supabaseInfoStore(state => state.setEmail)
-    const setPassword = supabaseInfoStore(state => state.setPassword)
+   
     const location = useLocation()
     const fromFeature = location.state?.fromFeature ? location.state.fromFeature : ""
     const handleSubmit=async(e: React.FormEvent<HTMLFormElement>)=>{
@@ -44,7 +44,6 @@ export const FormComponent = ({type}:{type:string})=>{
             if(typeof err == "string")setAuthError(err)
         }finally{
         setEmail("");
-        setPassword("");   
         }
     }
     return(
