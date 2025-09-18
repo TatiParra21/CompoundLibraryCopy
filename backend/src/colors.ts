@@ -30,52 +30,62 @@ export type SavedUserColorSchemeType={
   aatext:boolean, 
   aaatext:boolean
 }
+export type DeleteUserColorSchemeType={
+    user_id:string,
+    hex1:string,
+    hex2:string,
+}
+export type UpdateUserColorSchemeNameType={
+  user_id:string,
+  scheme_name:string,
+    hex1:string,
+    hex2:string,
+}
 const errorResponses: Record<string, string>={
 '23505': 'Color already exists',
 '23503':'Color messes with table constraint',
 '23502': 'Not null violation',
 }
-
 ///tells router to handle posts requests in the route /colors
-
-const makeValuesAndPlaceHolder =<T extends HexBodyType | ColorBodyType |ColorContrastType>(body:T[] )=>{
-  const values: (string | number | boolean)[] = [];
-  const placeholders: string[] = [];
-  if("name" in body[0]){
-     body.forEach((entry, index) => {
-      const color = entry as ColorBodyType
-    const i = index * 2;
-    placeholders.push(`($${i + 1}, $${i + 2})`);
-    values.push(color.name, color.closest_named_hex);
-  });
-  
-
-  }else if("hex" in body[0] && "clean_hex" in body[0]){
-     body.forEach((entry, index) => {
-      const i = index * 3;
-      const color = entry as HexBodyType
-      placeholders.push(`($${i + 1}, $${i + 2}, $${i + 3})`);
-      values.push(color.hex, color.closest_named_hex, color.clean_hex);
-    });
-  }else if("user_id" in body[0]){
-     body.forEach((entry, index) => {
-      const i = index * 9;
-      const color = entry as SavedUserColorSchemeType
-      placeholders.push(`($${i + 1}, $${i + 2}, $${i + 3}, $${i + 4}, $${i + 5}, $${i + 6}, $${i + 7}, $${i + 8},$${i + 9})`);
-      values.push(color.user_id, color.scheme_name,color.hex1, color.hex1name, color.hex2,color.hex2name, color.contrast_ratio, color.aatext, color.aaatext );
-    });
-
-  }else if("hex1"in body[0] && "hex2" in body[0]){
-     body.forEach((entry, index) => {
-      const i = index * 5;
-      const color = entry as ColorContrastType
-      placeholders.push(`($${i + 1}, $${i + 2}, $${i + 3}, $${i + 4}, $${i + 5})`);
-      values.push(color.hex1, color.hex2, color.contrast_ratio, color.aatext, color.aaatext );
-    });
-
+type AllPossibleBodyTypes =  HexBodyType | ColorBodyType |ColorContrastType | UpdateUserColorSchemeNameType 
+| DeleteUserColorSchemeType | SavedUserColorSchemeType;
+const createPlaceHolders=(count:number, start:number =1 )=>{
+  //num is index, back to the example below, if start is 1, andd count is 3
+  const placeHolders = Array.from({length:count},(el,num)=>`$${start+num}`)
+  return `(${placeHolders.join(", ")})`
+}
+const makeValuesAndPlaceHolder =<T extends AllPossibleBodyTypes>(body:T[] )=>{
+  const schemas= {
+    ColorBody:["name","closest_named_hex"],
+    HexBody:["hex","closest_named_hex","clean_hex"],
+    SaveUserColorSchemeBody: ["user_id", "scheme_name", "hex1", "hex1name",
+      "hex2", "hex2name", "contrast_ratio", "aatext", "aaatext"],
+      UpdateUserColorSchemeBody:["user_id", "scheme_name", "hex1","hex2"],
+      DeleteUserColorSchemeBody:["user_id", "hex1","hex2"],
+      ColorContrastBody:["hex1","hex2","contrast_ratio","aatext","aaatext"]
   }
+let currentSchema: keyof typeof schemas | undefined;
+ const bodyKeys = Object.keys(body[0])
+  for(const schema in schemas){
+    const schemaKeys = schemas[schema as keyof typeof schemas]
+   if(bodyKeys.every((key)=>schemaKeys.includes(key))){
+    currentSchema = schema as keyof typeof schemas
+   }
+  }     
+if (!currentSchema) throw new Error("Unknown schema for body");
+  const schemaKeys = schemas[currentSchema]
+    const values: (string | number | boolean)[] = [];
+  const placeholders: string[] = [];
+    body.forEach((entry, index) => {
+      //explantionn for myself
+      //the index is 0 for example, the curent scheme is  hexbody meaning the length is 3, so start is 1
+      const start = index * schemaKeys.length +1;
+      placeholders.push(createPlaceHolders(schemaKeys.length,start));
+      schemaKeys.forEach((key )=>{
+        values.push(entry[key as keyof T] as boolean| number|string );
+      })
+    });
   return {values,placeholders}
-
 }
 router.post('/:route', async(req: Request,res: Response):Promise<void>=>{
   const {route} = req.params
@@ -163,14 +173,12 @@ router.get("/:route",async(req: Request, res:Response): Promise<void>=>{
         SELECT scheme_name, hex1, hex1name, hex2, hex2name, contrast_ratio, aatext, aaatext
           FROM saved_user_color_schemes
                         WHERE user_id = $1`
-
     }
       result = await pool.query(queryMap[route],[closest])
       if(!result){
           res.status(400).json({error:"Unknown Route"})
           return
         }
-        
         if(result.rows.length == 0 ){ 
         res.status(200).json({message:"NO colors with hex found",hex: closest, found:false})
       }else if(result.rows.length >= 1){
@@ -180,5 +188,92 @@ router.get("/:route",async(req: Request, res:Response): Promise<void>=>{
    res.status(500).json({error: "SOmething went wrong"})
   }
 })
+router.delete("/:route",async(req:Request,res:Response):Promise<void>=>{
+   const {route} = req.params
+
+     try{
+      const body = req.body as AllPossibleBodyTypes
+       if(!body ||!Array.isArray(body)|| body.length === 0){
+            res.status(400).json({ error: "Invalid array body or missing body", route: `${route}`});
+          return;
+          } 
+        const {values, placeholders} = makeValuesAndPlaceHolder(body)
+          if(!values || !placeholders){
+               res.status(400).json({error: "Missing color name or closest named hex", })
+          }
+          const queryMap: Record<string,string> ={
+          "saved_user_color_schemes": `
+        DELETE FROM saved_user_color_schemes
+        WHERE user_id = $1 AND hex1 = $2 AND hex2 = $3
+        RETURNING *
+      `
+        }
+           if (!queryMap[route]) res.status(400).json({ error: "Unknown route" });
+          const result = await pool.query(queryMap[route],values)
+      
+        if(!result){
+          res.status(400).json({error:"Unknown Route"})
+        }
+    if (result.rows.length === 0) {
+      res.status(200).json({ message: "No matching colors found", found: false });
+    } else {
+      res.status(200).json({ message: "Deleted successfully", deleted: result.rows, found: true });
+    }
+    }catch(err: any) {
+      if(err.code && typeof err.code == "string"){
+        if (errorResponses[err.code]  ) {
+       res.status(200).json({ message: errorResponses[err.code] , found:true}); 
+        }
+      }
+      else{
+      res.status(404).json({message:"UNKNOWN ERROR",request:req.body, err:err, route: route})
+    } 
+  }
+})
+router.patch("/:route",async(req:Request,res:Response):Promise<void>=>{
+   const {route} = req.params
+
+     try{
+      const body = req.body as AllPossibleBodyTypes
+       if(!body ||!Array.isArray(body)|| body.length === 0){
+            res.status(400).json({ error: "Invalid array body or missing body", route: `${route}`});
+          return;
+          } 
+        const {values, placeholders} = makeValuesAndPlaceHolder(body)
+          if(!values || !placeholders){
+               res.status(400).json({error: "Missing color name or closest named hex", })
+          }
+          const queryMap: Record<string,string> ={
+          "saved_user_color_schemes": `
+          UPDATE saved_user_color_schemes
+          SET scheme_name = $2
+          WHERE user_id = $1
+            AND hex1 = $3
+            AND hex2 = $4
+            RETURNING *;
+            `
+        }
+           if (!queryMap[route]) res.status(400).json({ error: "Unknown route" });
+          const result = await pool.query(queryMap[route],values)
+        if(!result){
+          res.status(400).json({error:"Unknown Route"})
+        }
+    if (result.rows.length === 0) {
+      res.status(200).json({ message: "No matching colors found", found: false });
+    } else {
+      res.status(200).json({ message: "Updated successfully", updated: result.rows, found: true });
+    }
+    }catch(err: any) {
+      if(err.code && typeof err.code == "string"){
+        if (errorResponses[err.code]  ) {
+       res.status(200).json({ message: errorResponses[err.code] , found:true}); 
+        }
+      }
+      else{
+      res.status(404).json({message:"UNKNOWN ERROR",request:req.body, err:err, route: route})
+    } 
+  }
+})
 
 export default router
+

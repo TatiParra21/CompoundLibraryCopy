@@ -11,11 +11,11 @@ export type SavedUserColorSchemeType={
   aatext:boolean, 
   aaatext:boolean
 }
-const sendPostRequest = async(body: Array<Record<string,string|number|boolean|string[]>>, //this states the body should be an object, where every key, and every val is a string
+const sendRequestWithBody =async(method:string,body: Array<Record<string,string|number|boolean|string[]>>, //this states the body should be an object, where every key, and every val is a string
      route:string
     ): Promise<void>=>{     
     const response = await fetch(`https://compoundlibrarycopy.onrender.com/api/${route}`,{
-        method:"POST",
+        method:method,
         headers:{
             "Content-Type":"application/json"
         },
@@ -23,6 +23,16 @@ const sendPostRequest = async(body: Array<Record<string,string|number|boolean|st
     })
     const data = await response.json()
     if(!data.found)console.log(`added to ${route} color: `, data)        
+}
+
+export type DeleteUserColorSchemeType={
+    user_id:string,
+    hex1:string,
+    hex2:string,
+}
+export const sendUserDeleteRequest =async(schemeToDelete: DeleteUserColorSchemeType)=>{
+    await sendRequestWithBody("DELETE",[schemeToDelete], "saved_user_color_schemes")
+
 }
 const submitGetRequest=  async(closest_named_hex: string, route:string): Promise<any>=>{
         try{
@@ -46,7 +56,7 @@ type FrontEndColorType ={
 name:string, closest_named_hex: string
 }
 export const addColorInfoToDB =async(arr: FrontEndColorType[])=>{
-   await sendPostRequest(arr, "named_colors")
+   await sendRequestWithBody("POST",arr, "named_colors")
 }
 export const handleSingleColor =async(hexVal:string):Promise<ColorType>=>{
       const hexing : checkIfVariantInDBResult= await checkIfVariantInDB(hexVal)
@@ -58,8 +68,8 @@ export const handleSingleColor =async(hexVal:string):Promise<ColorType>=>{
                 const {hex, closest_named_hex, clean_hex, name} = test
                  hexVariantArr.push({hex,closest_named_hex, clean_hex})
                   colorNameArr.push({name, closest_named_hex})
-                     await sendPostRequest(colorNameArr, "named_colors")
-                  await sendPostRequest(hexVariantArr,"hex_variants")
+                     await sendRequestWithBody("POST",colorNameArr, "named_colors")
+                  await sendRequestWithBody("POST",hexVariantArr,"hex_variants")
                   return test
         }else{
             return hexing.results[0] 
@@ -107,8 +117,8 @@ for(const col of otherColors){
     hexVariantArr.push({hex,closest_named_hex, clean_hex})
     colorContrastArr.push({hex1,hex2,contrast_ratio:Number(contrast_ratio),aatext,aaatext})
     }
-    await sendPostRequest(colorContrastArr,"color_contrasts")
-    await sendPostRequest(hexVariantArr,"hex_variants")
+    await sendRequestWithBody("POST",colorContrastArr,"color_contrasts")
+    await sendRequestWithBody("POST",hexVariantArr,"hex_variants")
 }
 export const addHexVariantsArr = async(otherColors: ColorSchemeTypeArr)=>{
      const hexVariantArr:FrontEndHexBodyType[] = []
@@ -118,12 +128,19 @@ export const addHexVariantsArr = async(otherColors: ColorSchemeTypeArr)=>{
     hexVariantArr.push({hex,closest_named_hex, clean_hex})
     colorNameArr.push({name, closest_named_hex})
     }
-    await sendPostRequest(colorNameArr, "named_colors")
-    await sendPostRequest(hexVariantArr,"hex_variants")
+    await sendRequestWithBody("POST",colorNameArr, "named_colors")
+    await sendRequestWithBody("POST",hexVariantArr,"hex_variants")
 }
 
 export const saveColorSchemeForUser =async(pickedScheme: SavedUserColorSchemeType)=>{
-     await sendPostRequest([pickedScheme], "saved_user_color_schemes")
-     
-
+     await sendRequestWithBody("POST",[pickedScheme], "saved_user_color_schemes")
+}
+export type UpdateUserColorSchemeNameType={
+  user_id:string,
+  scheme_name:string,
+    hex1:string,
+    hex2:string,
+}
+export const updateSchemeNameForUser =async(pickedScheme: UpdateUserColorSchemeNameType)=>{
+     await sendRequestWithBody("PATCH",[pickedScheme], "saved_user_color_schemes")
 }

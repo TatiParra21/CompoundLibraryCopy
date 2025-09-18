@@ -22,7 +22,7 @@ const Header: React.FC =()=>{
                     <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="/">Dashboard</NavLink>
                     <nav>
                         <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="badges">Badges</NavLink>
-                        <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="banners">Banners</NavLink>
+                       
                         <NavLink style={({isActive})=>isActive ? selectedStyle : undefined} to="cards">Cards</NavLink>
                     </nav>
                 </div>

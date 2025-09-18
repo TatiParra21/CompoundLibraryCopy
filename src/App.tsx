@@ -6,7 +6,6 @@ import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Cards from './pages/Cards'
 import Badges from './pages/Badges'
-import Banners from './pages/Banners'
 import { SubLayout } from './components/SubLayout'
 import { FormComponent} from './components/SignIn'
 import { Provider } from './components/ui/provider'
@@ -31,7 +30,7 @@ const router = createBrowserRouter([
       element:<SubLayout/>,
       children:[
         {path:"badges",element:<Badges/>},
-        {path:"banners",element:<Banners/>},
+      
         {path:"cards",element:<Cards/>},
       ] 
     }

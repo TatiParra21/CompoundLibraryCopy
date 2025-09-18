@@ -168,6 +168,9 @@ border:solid black 2px;
 button:disabled{
   color:gray;
 }
+button:disabled:hover{
+  border: none;
+}
 input:-webkit-autofill {
   animation-name: autofill;
   animation-duration: 0.01s;

@@ -19,13 +19,10 @@ export const UserColorSchemesComp =()=>{
         )
     return(
         <div className="result-sec flex-colum" >
-        
-       
-           
-                    <HexInfo>
-            <div className={`badges-sec`}>
-                {allComponents} 
-            </div>
+            <HexInfo>
+                <div className={`badges-sec`}>
+                    {allComponents} 
+                </div>
             </HexInfo>    
         </div>
     )
