@@ -80,6 +80,7 @@ const setUserSchemes = authStateStore(state=>state.setUserSchemes)
               if(!userId)return
               const schemes = await fetchUserSchemes(userId)
              setUserSchemes((schemes))
+             console.log("it rann")
           }catch(err){
               throw err
           }

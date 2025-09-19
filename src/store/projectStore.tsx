@@ -108,7 +108,7 @@ export type AuthStateType = {
   session: any | null,
   userId:string |null,
   userSchemes: UserSchemesData[] |null,
-  setUserSchemes: (schemes:UserSchemesData[]) =>void,
+  setUserSchemes: (schemes:UserSchemesData[] |null) =>void,
   fetchUserSchemes: (userId:string)=>Promise<UserSchemesData[]>
   setSession: (session: any | null) => void;
   initAuth: () => void;
@@ -122,7 +122,7 @@ export const authStateStore = create<AuthStateType>((set)=>{
   setSession: (session: any | null) => set({session:session}),
   userId: null,
   userSchemes:null, 
-  setUserSchemes: (schemes:UserSchemesData[])=>set({userSchemes: schemes}),
+  setUserSchemes: (schemes:UserSchemesData[] |null)=>set({userSchemes: schemes}),
  fetchUserSchemes: async(userId:string):Promise<UserSchemesData[]>=>{
    
     const userData = await getUserSavedSchemesRequest(userId,"saved_user_color_schemes")

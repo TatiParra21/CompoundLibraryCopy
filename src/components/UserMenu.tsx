@@ -8,8 +8,10 @@ import {
   Stack,
   Text,useAvatar, Button
 } from "@chakra-ui/react"
+import { useNavigate } from "react-router-dom"
 import { supabase } from "../supabaseClient"
 import { supabaseInfoStore } from "../store/projectStore"
+import { authStateStore } from "../store/projectStore"
 export const Logout =({handleLogout}:{handleLogout:  () => Promise<void>}) =>{
 
   return (
@@ -44,9 +46,12 @@ const AvatarComponent =()=>{
 import { LuChartLine } from "react-icons/lu"
 
 export const UserMenu = ({ email }: { email: string }) => {
+  const navigate = useNavigate()
+  const setUserSchemes = authStateStore(state=>state.setUserSchemes)
     const setEmail = supabaseInfoStore(state => state.setEmail)
          const resetInfo=()=>{
             setEmail("")
+            setUserSchemes(null)
          }
   const handleLogout=async()=>{
       
@@ -54,6 +59,7 @@ export const UserMenu = ({ email }: { email: string }) => {
       const {error} = await supabase.auth.signOut()
       if(error)throw new Error(error.message)
         resetInfo()
+      navigate("/")
     }catch(err){
       console.error(err)
     }

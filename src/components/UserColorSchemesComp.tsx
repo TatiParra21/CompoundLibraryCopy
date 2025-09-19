@@ -2,6 +2,7 @@
 import { HexInfo } from "../components/HexInfo"
 import { colorDataStore, type ColorDataStoreType } from "../store/projectStore"
 import { PaginationComp } from "../components/PaginationComp"
+import { useNavigate } from "react-router-dom"
 import { authStateStore, type UserSchemesData } from "../store/projectStore"
 import {  UserSchemeComponentBase } from "./ComponentBase"
 import { LoadingRoller } from "./LoadingRoller"
@@ -10,16 +11,19 @@ export const UserColorSchemesComp =()=>{
   
    const [loading, setLoading] = useState<boolean>(true)
    const userSchemes:UserSchemesData[] |null = authStateStore(state=>state.userSchemes)
+   const session = authStateStore(state=>state.session)
+   const navigate = useNavigate()
 useEffect(()=>{
+if(!session) navigate("/")
     const loadColorSchemes = async()=>{   
         if(!loading)return
         setLoading(false)
     }
 loadColorSchemes()
 },[])
-      
-      console.log(userSchemes)
-   if(loading || !userSchemes )return <div><LoadingRoller/></div>
+ 
+   if(loading || !userSchemes )return <div>{ loading ? <LoadingRoller/> : "no ColorSchemes yet"}</div>
+   
    
 
    const allComponents = userSchemes.map((scheme: UserSchemesData)=>{

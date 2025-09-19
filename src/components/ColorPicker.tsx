@@ -4,8 +4,7 @@ import getAllColorInfo from "../functions/getAllColorInfo"
 import type {ColorInfo} from "./types"
 import { handleError } from "../functions/handleError"
 import type{ DebouncedValues } from "../store/projectStore"
-import { colorDataStore, type ColorDataStoreType } from "../store/projectStore"
-import { paginationStore, type PaginationStoreType } from "../store/projectStore"
+import { colorDataStore, type ColorDataStoreType,paginationStore, type PaginationStoreType } from "../store/projectStore"
 
 const ColorPicker =({children }:{children?:ReactNode})=>{
     const colorRef = useRef<string>("") //Reference to store latest color input, 
@@ -16,7 +15,6 @@ const ColorPicker =({children }:{children?:ReactNode})=>{
     useEffect(()=>{
         if(!allInfo)return
         const {contrastColors, mainColor} = allInfo
-        
         setTotal(contrastColors.length)
      },[allInfo])
      //fetches color from API or supabase whenever the selected color changes or the count changes.
@@ -73,35 +71,31 @@ const updateDebouncedValue = debouncedValueFunction(300)
                     <div className="flex-colum test-class" >
                         <input type="color" id="picker" value={debouncedValue.textInput ?? "#000000"} onChange={(e)=>updateDebouncedValue(e)}/>
                         <input type="text" id="write" value={debouncedValue.textInput ?? ""} onChange={(e)=>updateDebouncedValue(e)}/>
-                       
                     </div>        
             </div> 
              <button className="search-btn" disabled={loading ? true :isDisabled} onClick={()=>choseFromColorInput("textInput")}>{loading ? "...loading" : "Search contrasting colors"}</button> 
-                <button 
-                                onClick={async () => {
-                                  try {
-                                    const text = await navigator.clipboard.readText(); // get clipboard text
-                                    if (!text) return;
-
-                                    // update store state directly
-                                    setDebouncedValue({ ...debouncedValue, textInput: text });
-                                    setColor(text); 
-                                    setIsDisabled(false); 
-                                  } catch (err) {
+                <button disabled={loading ? true :isDisabled}
+                    onClick={async () => {
+                        try {
+                            const text = await navigator.clipboard.readText(); // get clipboard text
+                                if (!text) return;
+                                // update store state directly
+                                setDebouncedValue({ ...debouncedValue, textInput: text });
+                                //setColor(text); 
+                                setIsDisabled(false); 
+                                }catch(err) {
                                     console.error("Failed to read clipboard", err);
                                     setErrorMessage("Could not paste from clipboard");
                                   }
                                 }}
                                 >
-                                    Paste from clipboard
+                                Paste from clipboard
                             </button>
-        
-        </div>
+            </div>
             <>
                 {children}
             </>   
         </>
     )
 }
-
 export default ColorPicker

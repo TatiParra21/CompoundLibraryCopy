@@ -4,6 +4,7 @@ import { supabaseInfoStore} from "../store/projectStore"
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 
+
  const capitalizeFirstLetter =(value: string):string=>{
     return value.charAt(0).toUpperCase() + value.slice(1)
   }
@@ -26,7 +27,7 @@ export const FormComponent = ({type}:{type:string})=>{
     const authError = supabaseInfoStore(state => state.authError)
     const setAuthError = supabaseInfoStore(state => state.setAuthError)
     const setEmail = supabaseInfoStore(state => state.setEmail)
-   
+
     const location = useLocation()
     const fromFeature = location.state?.fromFeature ? location.state.fromFeature : ""
     const handleSubmit=async(e: React.FormEvent<HTMLFormElement>)=>{
@@ -34,17 +35,32 @@ export const FormComponent = ({type}:{type:string})=>{
         const formData = new FormData(form);
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
-        try{
+        
             e.preventDefault()
-             const { error} = type == "sign-in" ? await supabase.auth.signInWithPassword({email, password}) : await supabase.auth.signUp({email, password})
-            if (error) throw new Error(error.message)
+             const { data, error} = type == "sign-in" ? await supabase.auth.signInWithPassword({email, password}) : await supabase.auth.signUp({email, password})
+              if (error) {
+                setAuthError(error.message);
+                return;
+                    }
+                if (!data.session) {
+      if (data.user?.aud === "authenticated") {
+        if (!data.user.user_metadata?.email_verified) {
+          setAuthError("Email has not been verified yet.");
+          return;
+        } else {
+          setAuthError("Account already exists, please sign in.");
+          return;
+        }
+      } else {
+        setAuthError("No session returned. Check credentials.");
+        return;
+      }
+    }
+               
+                
             setAuthError(null)
             navigate("/")   
-        }catch(err){
-            if(typeof err == "string")setAuthError(err)
-        }finally{
-        setEmail("");
-        }
+            setEmail(""); 
     }
     return(
         <div  className="sign-form-container flex colum">

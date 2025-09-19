@@ -10,8 +10,10 @@ const ColorDataInfoComp =({contrast_ratio, aatext, aaatext}:{contrast_ratio:stri
   return(
     <>
       <p>{`Ratio: ${contrast_ratio ?? "no ratio yet"}`}</p>
-      <p>{`AA Text: ${aatext}`}</p>
-      <p>{`AAA Text: ${aaatext}`}</p>
+      <div className="flex-row">
+        <p>{`AA Text: ${aatext ? "✅":"❌" }`}</p>
+        <p>{`AAA Text: ${aaatext  ? "✅":"❌"}`}</p>
+      </div>
     </>
   )
 }
@@ -19,8 +21,8 @@ const UserColorDataInfoComp =({ aatext, aaatext}:{ aatext:boolean, aaatext:boole
   return(
     <>
 
-      <p>{`AA Text: ${aatext}`}</p>
-      <p>{`AAA Text: ${aaatext}`}</p>
+      <p>{`AA Text: ${aatext ? "✅":"❌" }`}</p>
+      <p>{`AAA Text: ${aaatext ? "✅":"❌" }`}</p>
     </>
   )
 }
@@ -194,12 +196,14 @@ export const UserSchemeComponentBase =({ userScheme}: {userScheme:UserSchemesDat
             </div>
                 
             <div className="color-desc flex-colum">
+              <div className="flex-row">
                 {textType== "Normal" && <>
-                 <UserColorDataInfoComp  aatext={aatext} aaatext={aaatext}/>
+                  <UserColorDataInfoComp  aatext={aatext} aaatext={aaatext}/>
                 </>}
-               {textType == "Large" && <>
-                <UserColorDataInfoComp  aatext={Number(contrast_ratio) > 3} aaatext={Number(contrast_ratio) > 4.5}/>
+                  {textType == "Large" && <>
+                  <UserColorDataInfoComp  aatext={Number(contrast_ratio) > 3} aaatext={Number(contrast_ratio) > 4.5}/>
                </>}
+               </div>
                <button onClick={openChangeNameComp}>Change Name</button>
                { !openChangeName || <>
                 <label htmlFor={scheme_name || `${foreGroundColor.name}-${backGroundColor.name}`}>New Name:</label>
@@ -210,7 +214,7 @@ export const UserSchemeComponentBase =({ userScheme}: {userScheme:UserSchemesDat
               ></input>
               <button onClick={changeSchemeName}>Submit</button>
                 </>}
-              <button onClick={removeScheme}>Remove from favorites?</button>
+              <button onClick={removeScheme}>Remove </button>
             </div>     
         </div>
     )
