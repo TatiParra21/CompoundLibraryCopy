@@ -172,7 +172,7 @@ router.get("/:route",async(req: Request, res:Response): Promise<void>=>{
        "saved_user_color_schemes": `
         SELECT scheme_name, hex1, hex1name, hex2, hex2name, contrast_ratio, aatext, aaatext
           FROM saved_user_color_schemes
-                        WHERE user_id = $1`
+                        WHERE user_id = $1 ORDER BY updated_at DESC, created_at DESC`
     }
       result = await pool.query(queryMap[route],[closest])
       if(!result){

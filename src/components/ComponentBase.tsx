@@ -1,10 +1,11 @@
 import type {  ComponentType} from "../components/types"
 import { useRef, useState } from "react"
 import { type HexSizeStoreType, hexSizeStore, colorDataStore, authStateStore } from "../store/projectStore"
-import { saveColorSchemeForUser, type SavedUserColorSchemeType,type DeleteUserColorSchemeType, sendUserDeleteRequest } from "../functions/requestFunctions"
+import { saveColorSchemeForUser, type SavedUserColorSchemeType, sendUserDeleteRequest } from "../functions/requestFunctions"
 import { supabase } from "../supabaseClient"
 import {type UserSchemesData } from "../store/projectStore"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom" 
+import { updateSchemeNameForUser } from "../functions/requestFunctions"
 const ColorDataInfoComp =({contrast_ratio, aatext, aaatext}:{contrast_ratio:string|number, aatext:boolean, aaatext:boolean})=>{
   return(
     <>
@@ -106,10 +107,6 @@ export const ComponentBase =({ variant,colorName, mainStyle, className}: Compone
     )
 }
 
-type SingleColorStateType = {
-  hex:string,
-  name:string
-}
 export const UserSchemeComponentBase =({ userScheme}: {userScheme:UserSchemesData})=>{
    
     const copyHex = colorDataStore(state=>state.copyHex)
@@ -117,6 +114,7 @@ export const UserSchemeComponentBase =({ userScheme}: {userScheme:UserSchemesDat
     
     const foreGroundRefValue = useRef<HTMLInputElement>(null)
     const backGroundRefValue = useRef<HTMLInputElement>(null)
+    const nameRef = useRef<HTMLInputElement>(null)
     const onCopy =(ref:string)=>{
         const hexValue = ref == "foreground" ? foreGroundRefValue.current?.innerText : backGroundRefValue.current?.innerText
         if(hexValue){
@@ -127,35 +125,55 @@ export const UserSchemeComponentBase =({ userScheme}: {userScheme:UserSchemesDat
 }
    const {textType}:HexSizeStoreType = hexSizeStore(state=>state)
   const {aaatext,aatext,contrast_ratio, hex1,hex2, hex1name, hex2name, scheme_name} = userScheme
-  
-  const [foreGroundColor, setForeGroundColor] = useState<SingleColorStateType>({hex:hex1, name:hex1name})
-  const [backGroundColor, setBackGroundColor] = useState<SingleColorStateType>({hex:hex2, name:hex2name})
+
+  const foreGroundColor = {hex:hex1, name:hex1name}
+  const backGroundColor = {hex:hex2, name:hex2name}
+  const [openChangeName, setOpenChangeName] = useState<boolean>(false)
   const setUserSchemes = authStateStore(state=>state.setUserSchemes)
   const fetchUserSchemes = authStateStore(state=>state.fetchUserSchemes)
   const userId = authStateStore(state=>state.userId)
-  const switchColors =()=>{
-    setForeGroundColor(backGroundColor)
-    setBackGroundColor(foreGroundColor)
+  const fetchAndUpdateUserSchemes=async(userId:string) =>{
+ const updatedSchemes = await fetchUserSchemes(userId)
+    setUserSchemes(updatedSchemes)
   }
+
   const removeScheme =async()=>{
     if(!userId)return
     await sendUserDeleteRequest({user_id:userId, hex1:hex1, hex2:hex2})
-    const updatedSchemes = await fetchUserSchemes(userId)
-    setUserSchemes(updatedSchemes)
+   await fetchAndUpdateUserSchemes(userId)
 
   }
   const mainStyle ={
                 color:`${foreGroundColor.hex}`,
                 background: `${backGroundColor.hex}` ,          
   }
+    const mainStyle2 ={
+                color:`${backGroundColor.hex}`,
+                background: `${foreGroundColor.hex}` ,          
+  }
+  const openChangeNameComp =()=>{
+    setOpenChangeName(prev=>!prev)
+
+  }
+  const changeSchemeName =async()=>{
+    if(!userId)return
+    const newScheme = nameRef.current?.value
+    if(!newScheme)return 
+    await updateSchemeNameForUser({user_id:userId, scheme_name:newScheme, hex1:hex1, hex2:hex2})
+    await fetchAndUpdateUserSchemes(userId)
+    openChangeNameComp()
+
+  }
     return(
          <div className="badge-div">
-            <h3>{scheme_name || `${foreGroundColor.name} and ${backGroundColor.name}`} </h3>  
-               
+       
+            <h3>{scheme_name || `${foreGroundColor.name} and ${backGroundColor.name}`} </h3>        
               <p className="result-sec flex-colum" style={{...mainStyle, }} > 
                   {`Ratio: ${contrast_ratio}`}
                 </p>
-                <button onClick={switchColors}>🔁</button>
+                <p className="result-sec flex-colum" style={{...mainStyle2, }} > 
+                  {`Ratio: ${contrast_ratio}`}
+                </p>
             <div className="foreground-sec">
               
                   <div className="color-div" style={{cursor: "pointer", userSelect: "none" }}>
@@ -182,6 +200,16 @@ export const UserSchemeComponentBase =({ userScheme}: {userScheme:UserSchemesDat
                {textType == "Large" && <>
                 <UserColorDataInfoComp  aatext={Number(contrast_ratio) > 3} aaatext={Number(contrast_ratio) > 4.5}/>
                </>}
+               <button onClick={openChangeNameComp}>Change Name</button>
+               { !openChangeName || <>
+                <label htmlFor={scheme_name || `${foreGroundColor.name}-${backGroundColor.name}`}>New Name:</label>
+
+               <input ref={nameRef} 
+                type="text"
+                name={scheme_name || `${foreGroundColor.name}-${backGroundColor.name}`}
+              ></input>
+              <button onClick={changeSchemeName}>Submit</button>
+                </>}
               <button onClick={removeScheme}>Remove from favorites?</button>
             </div>     
         </div>

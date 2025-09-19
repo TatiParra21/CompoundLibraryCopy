@@ -1,7 +1,7 @@
 
 import { createBrowserRouter, RouterProvider  } from 'react-router-dom'
 import './App.css'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Cards from './pages/Cards'
@@ -12,7 +12,7 @@ import { Provider } from './components/ui/provider'
 import {  authStateStore } from './store/projectStore'
 import { supabaseInfoStore } from './store/projectStore'
 import { UserColorSchemesComp } from './components/UserColorSchemesComp'
-
+import { LoadingRoller } from './components/LoadingRoller'
 const router = createBrowserRouter([
   {path:"/",element:<Layout/>,
   children:[
@@ -39,6 +39,7 @@ const router = createBrowserRouter([
 ])
 
 function App() {
+const [loadingSection, setLoadingSection] = useState<boolean>(true)
 
 const initAuth = authStateStore(state=>state.initAuth)
 const session = authStateStore(state=>state.session)
@@ -51,7 +52,18 @@ const setUserSchemes = authStateStore(state=>state.setUserSchemes)
  
 
   useEffect(()=>{
-   initAuth()
+    const runInitAuth =async()=>{
+      try{
+       initAuth()
+
+      }catch(err){
+
+      }finally{
+        setLoadingSection(false)
+      }
+
+    }
+    runInitAuth()
    
   },[])
   useEffect(()=>{
@@ -76,6 +88,11 @@ const setUserSchemes = authStateStore(state=>state.setUserSchemes)
   
    
   },[session])
+
+  if(loadingSection){
+    return( <LoadingRoller/>)
+
+  }
   return (
     <>
     <Provider>
